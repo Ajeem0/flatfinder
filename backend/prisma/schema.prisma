@@ -1,0 +1,216 @@
+// FlatFinder database schema
+// Run `npx prisma migrate dev --name init` after setting DATABASE_URL in .env
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  TENANT
+  OWNER
+  AGENT
+  ADMIN
+}
+
+enum PropertyType {
+  APARTMENT
+  INDEPENDENT_HOUSE
+  VILLA
+  PG
+  ROOM
+  FLATMATE
+}
+
+enum FurnishingStatus {
+  FURNISHED
+  SEMI_FURNISHED
+  UNFURNISHED
+}
+
+enum ListingStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+  RENTED
+  ARCHIVED
+}
+
+enum EnquiryStatus {
+  NEW
+  RESPONDED
+  CLOSED
+}
+
+enum VisitStatus {
+  REQUESTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model City {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  state     String?
+  isPopular Boolean    @default(false)
+  locations Location[]
+  createdAt DateTime   @default(now())
+}
+
+model Location {
+  id         String     @id @default(cuid())
+  name       String
+  city       City       @relation(fields: [cityId], references: [id])
+  cityId     String
+  latitude   Float?
+  longitude  Float?
+  properties Property[]
+
+  @@unique([name, cityId])
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  name               String
+  email              String    @unique
+  phone              String?   @unique
+  passwordHash       String
+  userType           UserType  @default(TENANT)
+  profilePhotoUrl    String?
+  isPhoneVerified    Boolean   @default(false)
+  preferredLocation  String?
+  budgetMin           Int?
+  budgetMax           Int?
+  propertyPreference String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  properties Property[] @relation("OwnerProperties")
+  favorites  Favorite[]
+  enquiriesSent     Enquiry[]  @relation("EnquiriesSent")
+  visits            Visit[]    @relation("VisitsRequested")
+  reportsFiled      Report[]   @relation("ReportsFiled")
+}
+
+model Property {
+  id               String            @id @default(cuid())
+  slug             String            @unique
+  title            String
+  description      String
+  propertyType     PropertyType
+  bhk              Int?
+  areaSqft         Int?
+  floor            Int?
+  totalFloors      Int?
+  furnishing       FurnishingStatus  @default(UNFURNISHED)
+  propertyAgeYears Int?
+  monthlyRent      Int
+  securityDeposit  Int               @default(0)
+  maintenance      Int               @default(0)
+  brokerage        Int               @default(0)
+  noBrokerage      Boolean           @default(false)
+  bachelorFriendly Boolean           @default(true)
+  familyFriendly   Boolean           @default(true)
+  petFriendly      Boolean           @default(false)
+  availableFrom    DateTime?
+  status           ListingStatus     @default(PENDING)
+  viewCount        Int               @default(0)
+  address          String?
+  pincode          String?
+  latitude         Float?
+  longitude        Float?
+
+  owner    User   @relation("OwnerProperties", fields: [ownerId], references: [id])
+  ownerId  String
+
+  location   Location? @relation(fields: [locationId], references: [id])
+  locationId String?
+
+  videoUrl   String?
+  images     PropertyImage[]
+  amenities  PropertyAmenity[]
+  favorites  Favorite[]
+  enquiries  Enquiry[]
+  visits     Visit[]
+  reports    Report[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([monthlyRent])
+  @@index([bhk])
+  @@index([propertyType])
+  @@index([status])
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+  url        String
+  sortOrder  Int      @default(0)
+}
+
+model Amenity {
+  id         String            @id @default(cuid())
+  name       String            @unique
+  icon       String?
+  properties PropertyAmenity[]
+}
+
+model PropertyAmenity {
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  amenityId  String
+
+  @@id([propertyId, amenityId])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+}
+
+model Enquiry {
+  id         String        @id @default(cuid())
+  property   Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+  user       User          @relation("EnquiriesSent", fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  message    String?
+  status     EnquiryStatus @default(NEW)
+  createdAt  DateTime      @default(now())
+}
+
+model Visit {
+  id         String      @id @default(cuid())
+  property   Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+  user       User        @relation("VisitsRequested", fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  scheduledDate DateTime
+  status     VisitStatus @default(REQUESTED)
+  createdAt  DateTime    @default(now())
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String?
+  reporter   User     @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  reporterId String
+  reason     String
+  createdAt  DateTime @default(now())
+}
