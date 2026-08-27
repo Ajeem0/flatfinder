@@ -19,7 +19,7 @@ function isAllowedLocalOrigin(origin) {
 }
 
 const allowedOrigins = new Set(
-  [process.env.CORS_ORIGIN, "http://localhost:5173", "http://localhost:5174"].filter(Boolean)
+  [process.env.CORS_ORIGIN, "http://localhost:5173", "https://flatfinder-beta.vercel.app/"].filter(Boolean)
 );
 
 app.use(
