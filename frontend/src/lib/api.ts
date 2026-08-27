@@ -8,7 +8,7 @@ import type {
   Visit,
 } from "../types";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const BASE_URL = import.meta.env.API_URL || "http://localhost:4000/api";
 const TOKEN_KEY = "flatfinder_token";
 
 export function getToken() {
