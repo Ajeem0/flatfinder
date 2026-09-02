@@ -4,6 +4,35 @@ const { requireAuth, requireUserType } = require("../middleware/auth");
 
 const router = express.Router();
 
+// GET /api/admin/users -- users who can own properties
+router.get("/users", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: { userType: { in: ["OWNER", "AGENT"] } },
+      select: { id: true, name: true, email: true, phone: true, userType: true },
+      orderBy: { name: "asc" },
+    });
+    res.json({ results: users });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /api/admin/users/:id/phone -- admin-maintained owner contact number
+router.put("/users/:id/phone", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
+  try {
+    const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: { phone: phone || null },
+      select: { id: true, name: true, email: true, phone: true, userType: true },
+    });
+    res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/admin/properties/pending
 router.get("/properties/pending", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
   try {

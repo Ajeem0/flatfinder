@@ -8,7 +8,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../context/AuthContext";
 
 const STEPS = ["Type", "Location", "Details", "Pricing", "Amenities", "Photos", "Description", "Preview"];
-const AMENITY_LIST = ["Parking", "Lift", "Wi-Fi", "AC", "Power Backup", "Security", "Gym", "Swimming Pool", "Balcony", "Water Supply", "Attached Bathroom"];
+export const AMENITY_LIST = ["Parking", "Lift", "Wi-Fi", "AC", "Power Backup", "Security", "Gym", "Swimming Pool", "Balcony", "Water Supply", "Attached Bathroom"];
 
 interface FormState {
   propertyType: string;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import type { Property } from "../types";
@@ -95,18 +96,20 @@ export default function AdminListings() {
                 <div className="text-xs text-ink-soft mt-2">{p.description}</div>
               </div>
               <div className="flex flex-col gap-2 min-w-[160px]">
+                <Link to={`/admin/properties/${p.id}/edit`} className="rounded-lg border border-primary px-4 py-2 text-center text-sm font-semibold text-primary hover:bg-primary-soft">
+                  Edit property
+                </Link>
                 {view === "pending" ? (
                   <>
                     <button onClick={() => approve(p.id)} className="rounded bg-green-600 text-white px-3 py-1">Approve &amp; publish</button>
                     <button onClick={() => reject(p.id)} className="rounded border border-line px-3 py-1 text-ink">Reject</button>
                   </>
                 ) : (
-                  <button
-                    onClick={() => remove(p.id, p.title)}
-                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
-                  >
-                    Remove property
-                  </button>
+                  <>
+                    <button onClick={() => remove(p.id, p.title)} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700">
+                      Remove property
+                    </button>
+                  </>
                 )}
               </div>
             </div>

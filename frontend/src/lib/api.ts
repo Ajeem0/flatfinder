@@ -96,6 +96,9 @@ export const api = {
     list: () => request<{ results: CityWithLocalities[] }>("/locations"),
   },
   admin: {
+    users: () => request<{ results: Array<{ id: string; name: string; email: string; phone: string | null; userType: string }> }>("/admin/users"),
+    updateUserPhone: (id: string, phone: string) =>
+      request<{ user: { id: string; phone: string | null } }>(`/admin/users/${id}/phone`, { method: "PUT", body: JSON.stringify({ phone }) }),
     pendingProperties: () => request<{ results: Property[] }>("/admin/properties/pending"),
     allProperties: () => request<{ results: Property[] }>("/admin/properties/all"),
     approveProperty: (id: string) => request<{ property: Property }>(`/admin/properties/${id}/approve`, { method: "POST" }),

@@ -351,7 +351,7 @@ router.put("/:id", requireAuth, async (req, res, next) => {
       title, description, bhk, areaSqft, floor, totalFloors, furnishing,
       propertyAgeYears, monthlyRent, securityDeposit, maintenance, brokerage,
       noBrokerage, bachelorFriendly, familyFriendly, petFriendly, availableFrom,
-      address, pincode, images, status,
+      address, pincode, latitude, longitude, videoUrl, images, amenities, cityName, locationName, status, ownerId,
     } = req.body;
 
     const data = {
@@ -360,13 +360,40 @@ router.put("/:id", requireAuth, async (req, res, next) => {
       noBrokerage, bachelorFriendly, familyFriendly, petFriendly, address, pincode,
     };
     if (availableFrom) data.availableFrom = new Date(availableFrom);
-    // Owners can only pull a listing (ARCHIVED) or mark it RENTED themselves;
-    // moving something back to PUBLISHED requires admin approval again.
-    if (status && ["ARCHIVED", "RENTED"].includes(status)) data.status = status;
+    if (videoUrl !== undefined) data.videoUrl = videoUrl || null;
+    if (latitude !== undefined) data.latitude = latitude;
+    if (longitude !== undefined) data.longitude = longitude;
+    if (ownerId && req.user.userType === "ADMIN") data.owner = { connect: { id: ownerId } };
+
+    if (cityName && locationName) {
+      const city = await prisma.city.upsert({
+        where: { name: cityName },
+        update: {},
+        create: { name: cityName },
+      });
+      const location = await prisma.location.upsert({
+        where: { name_cityId: { name: locationName, cityId: city.id } },
+        update: { latitude, longitude },
+        create: { name: locationName, cityId: city.id, latitude, longitude },
+      });
+      data.location = { connect: { id: location.id } };
+    }
+    // Owners can only pull a listing or mark it rented; admins can set any review status.
+    if (status && (req.user.userType === "ADMIN" || ["ARCHIVED", "RENTED"].includes(status))) {
+      data.status = status;
+    }
 
     if (Array.isArray(images)) {
       await prisma.propertyImage.deleteMany({ where: { propertyId: existing.id } });
       data.images = { create: images.map((url, i) => ({ url, sortOrder: i })) };
+    }
+
+    if (Array.isArray(amenities)) {
+      const amenityRecords = await Promise.all(
+        amenities.map((name) => prisma.amenity.upsert({ where: { name }, update: {}, create: { name } }))
+      );
+      await prisma.propertyAmenity.deleteMany({ where: { propertyId: existing.id } });
+      data.amenities = { create: amenityRecords.map((amenity) => ({ amenityId: amenity.id })) };
     }
 
     const property = await prisma.property.update({

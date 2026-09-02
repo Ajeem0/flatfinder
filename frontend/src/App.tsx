@@ -13,6 +13,7 @@ import Favorites from "./pages/Favorites";
 import Dashboard from "./pages/Dashboard";
 import PostProperty from "./pages/PostProperty";
 import AdminListings from "./pages/AdminListings";
+import AdminPropertyEdit from "./pages/AdminPropertyEdit";
 import PgFinder from "./pages/PgFinder";
 import Flatmates from "./pages/Flatmates";
 import NotFound from "./pages/NotFound";
@@ -57,6 +58,14 @@ function AppShell() {
             element={
               <ProtectedRoute roles={["ADMIN"]}>
                 <AdminListings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/properties/:id/edit"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminPropertyEdit />
               </ProtectedRoute>
             }
           />
