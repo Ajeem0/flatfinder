@@ -2,18 +2,20 @@ import { useEffect, type ElementType, type HTMLAttributes, type ReactNode } from
 
 export function useScrollReveal() {
   useEffect(() => {
-    const elements = Array.from(document.querySelectorAll("[data-reveal]"));
-
-    if (!elements.length) return;
+    let observer: IntersectionObserver | undefined;
+    let mutations: MutationObserver | undefined;
+    let frame = 0;
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReducedMotion) {
-      elements.forEach((element) => element.classList.add("is-visible"));
-      return;
+      frame = window.requestAnimationFrame(() => {
+        document.querySelectorAll("[data-reveal]").forEach((element) => element.classList.add("is-visible"));
+      });
+      return () => window.cancelAnimationFrame(frame);
     }
 
-    const observer = new IntersectionObserver(
+    observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
@@ -25,7 +27,7 @@ export function useScrollReveal() {
             target.classList.add("is-visible");
           }, delay);
 
-          observer.unobserve(target);
+          observer?.unobserve(target);
         });
       },
       {
@@ -34,9 +36,21 @@ export function useScrollReveal() {
       }
     );
 
-    elements.forEach((element) => observer.observe(element));
+    const observeElements = (root: ParentNode = document) => {
+      root.querySelectorAll("[data-reveal]").forEach((element) => observer?.observe(element));
+    };
 
-    return () => observer.disconnect();
+    frame = window.requestAnimationFrame(() => {
+      observeElements();
+      mutations = new MutationObserver(() => observeElements());
+      mutations.observe(document.body, { childList: true, subtree: true });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      mutations?.disconnect();
+      observer?.disconnect();
+    };
   }, []);
 }
 
