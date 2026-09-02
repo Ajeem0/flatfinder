@@ -34,8 +34,45 @@ export default function Dashboard() {
         )}
       </div>
 
+      {isAdmin && <AdminProfile />}
       {isOwner ? <OwnerDashboard /> : <TenantDashboard />}
     </div>
+  );
+}
+
+function AdminProfile() {
+  const { user, refreshUser } = useAuth();
+  const { notify } = useToast();
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [saving, setSaving] = useState(false);
+
+  async function savePhone() {
+    setSaving(true);
+    try {
+      await api.auth.updateMe({ phone: phone.trim() || null });
+      await refreshUser();
+      notify("Admin phone number updated", "success");
+    } catch {
+      notify("Could not update admin phone number", "error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section className="mb-8 rounded-2xl border border-line bg-white p-5 sm:p-6">
+      <h2 className="font-display text-lg font-semibold text-ink">Admin profile</h2>
+      <p className="mt-1 text-sm text-ink-soft">Update the phone number linked to your admin account.</p>
+      <div className="mt-4 flex max-w-md flex-col gap-2 sm:flex-row sm:items-end">
+        <label className="flex-1 text-sm font-medium text-ink">
+          Phone number
+          <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+91 98765 43210" className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal outline-none focus:border-primary" />
+        </label>
+        <button onClick={savePhone} disabled={saving} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
+          {saving ? "Saving..." : "Save number"}
+        </button>
+      </div>
+    </section>
   );
 }
 
