@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Heart, Home, Search, PlusCircle, User as UserIcon, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const navLinks = [
@@ -13,15 +13,27 @@ const navLinks = [
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const isAdmin = user?.userType === "ADMIN";
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
+      <header
+        className={`sticky top-0 z-40 border-b border-line transition-all duration-300 ${
+          scrolled ? "bg-surface/80 shadow-[0_10px_25px_rgba(20,22,43,0.06)] backdrop-blur-xl" : "bg-surface/90 backdrop-blur"
+        }`}
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white font-display font-bold">F</span>
+          <Link to="/" className="logo-mark flex items-center gap-2 shrink-0 transition-transform duration-200 hover:scale-[1.01]">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white font-display font-bold shadow-[0_8px_18px_rgba(55,48,165,0.25)]">F</span>
             <span className="font-display text-lg font-semibold tracking-tight text-ink">FlatFinder</span>
           </Link>
 
@@ -31,7 +43,7 @@ export default function Navbar() {
                 key={l.label}
                 to={l.to}
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors hover:text-primary ${isActive ? "text-primary" : "text-ink-soft"}`
+                  `nav-link text-sm font-medium ${isActive ? "active text-primary" : "text-ink-soft"}`
                 }
               >
                 {l.label}
@@ -41,7 +53,7 @@ export default function Navbar() {
               <NavLink
                 to="/admin/listings"
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors hover:text-primary ${isActive ? "text-primary" : "text-ink-soft"}`
+                  `nav-link text-sm font-medium ${isActive ? "active text-primary" : "text-ink-soft"}`
                 }
               >
                 Admin Approvals
@@ -92,7 +104,7 @@ export default function Navbar() {
         </div>
 
         {open && (
-          <div className="lg:hidden border-t border-line bg-surface px-4 py-3 flex flex-col gap-3">
+          <div className="lg:hidden border-t border-line bg-surface px-4 py-3 flex flex-col gap-3 shadow-[0_12px_20px_rgba(20,22,43,0.05)]">
             {navLinks.map((l) => (
               <Link key={l.label} to={l.to} onClick={() => setOpen(false)} className="text-sm font-medium text-ink py-1.5">
                 {l.label}
@@ -135,8 +147,7 @@ export default function Navbar() {
         )}
       </header>
 
-      {/* Mobile bottom navigation, per spec section 20 */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-line bg-surface/95 backdrop-blur py-2 px-2">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-line bg-surface/95 backdrop-blur py-2 px-2 shadow-[0_-10px_20px_rgba(20,22,43,0.04)]">
         <MobileTab to="/" icon={<Home size={20} />} label="Home" />
         <MobileTab to="/properties" icon={<Search size={20} />} label="Search" />
         <MobileTab to="/post-property" icon={<PlusCircle size={20} />} label="Post" />
@@ -152,7 +163,7 @@ function MobileTab({ to, icon, label }: { to: string; icon: React.ReactNode; lab
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[11px] font-medium ${
+        `flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[11px] font-medium transition-colors ${
           isActive ? "text-primary" : "text-ink-soft"
         }`
       }

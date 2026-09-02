@@ -41,7 +41,7 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="rounded-2xl border border-line bg-white/95 backdrop-blur shadow-xl p-3 sm:p-4">
+    <div className="hover-lift rounded-2xl border border-line bg-white/95 backdrop-blur shadow-xl p-3 sm:p-4 glass-shell">
       <div className="flex items-center justify-between mb-3 px-1">
         <span className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
           {smartMode ? "Smart search" : "Guided search"}

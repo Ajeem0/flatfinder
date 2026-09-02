@@ -64,7 +64,7 @@ const INITIAL: FormState = {
 
 export default function PostProperty() {
   return (
-    <ProtectedRoute roles={["OWNER", "AGENT", "ADMIN"]}>
+    <ProtectedRoute>
       <PostPropertyForm />
     </ProtectedRoute>
   );

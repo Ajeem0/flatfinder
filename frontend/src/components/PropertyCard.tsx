@@ -7,15 +7,20 @@ interface Props {
   property: Property;
   onToggleFavorite?: (id: string) => void;
   favoritePending?: boolean;
+  revealDelay?: number;
 }
 
-export default function PropertyCard({ property, onToggleFavorite, favoritePending }: Props) {
+export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0 }: Props) {
   const cover = property.images[0];
   const isRecentlyApproved =
     property.status === "PUBLISHED" && Date.now() - new Date(property.updatedAt).getTime() < 1000 * 60;
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+    <div
+      className="card-lift group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-sm"
+      data-reveal
+      data-delay={revealDelay}
+    >
       <Link to={`/property/${property.slug}`} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-primary-soft">
           {cover ? (

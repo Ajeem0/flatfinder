@@ -129,10 +129,12 @@ export default function Properties() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 pb-24 lg:pb-8">
       <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
-        <FilterSidebar filters={filters} onChange={updateFilters} onClear={() => setFilters(EMPTY_FILTERS)} className="hidden lg:flex" />
+        <div data-reveal>
+          <FilterSidebar filters={filters} onChange={updateFilters} onClear={() => setFilters(EMPTY_FILTERS)} className="hidden lg:flex" />
+        </div>
 
         <div>
-          <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+          <div className="flex items-center justify-between gap-3 mb-2 flex-wrap" data-reveal>
             <div>
               <h1 className="font-display text-2xl font-semibold text-ink">{heading}</h1>
               <p className="text-sm text-ink-soft mt-0.5">{results === null ? "Searching..." : `${total} propert${total === 1 ? "y" : "ies"} found`}</p>
@@ -196,8 +198,8 @@ export default function Properties() {
           ) : (
             <>
               <div className={view === "grid" ? "grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
-                {results.map((p) => (
-                  <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} />
+                {results.map((p, index) => (
+                  <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} revealDelay={index * 60} />
                 ))}
               </div>
 

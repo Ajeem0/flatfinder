@@ -202,7 +202,6 @@ router.get("/", optionalAuth, async (req, res, next) => {
 router.post(
   "/",
   requireAuth,
-  requireUserType("OWNER", "AGENT", "ADMIN"),
   [
     body("title").trim().notEmpty().withMessage("Title is required"),
     body("description").trim().notEmpty().withMessage("Description is required"),

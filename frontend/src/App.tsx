@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -17,41 +18,62 @@ import Flatmates from "./pages/Flatmates";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+function AppShell() {
+  const [isBooting, setIsBooting] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsBooting(false), 450);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return (
+    <>
+      <div className={`app-splash ${isBooting ? "is-visible" : "is-hidden"}`} aria-hidden={!isBooting}>
+        <div className="app-splash__logo">
+          <span>F</span>
+        </div>
+      </div>
+
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/properties" element={<Properties />} />
+          <Route path="/property/:slug" element={<PropertyDetail />} />
+          <Route path="/pg" element={<PgFinder />} />
+          <Route path="/flatmates" element={<Flatmates />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/listings"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminListings />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/post-property" element={<PostProperty />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
+    </>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/properties" element={<Properties />} />
-              <Route path="/property/:slug" element={<PropertyDetail />} />
-              <Route path="/pg" element={<PgFinder />} />
-              <Route path="/flatmates" element={<Flatmates />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/listings"
-                element={
-                  <ProtectedRoute roles={["ADMIN"]}>
-                    <AdminListings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/post-property" element={<PostProperty />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
+          <AppShell />
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
