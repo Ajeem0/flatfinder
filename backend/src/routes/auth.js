@@ -4,8 +4,10 @@ const { body, validationResult } = require("express-validator");
 const prisma = require("../config/db");
 const { signToken } = require("../utils/jwt");
 const { requireAuth } = require("../middleware/auth");
+const { OAuth2Client } = require("google-auth-library");
 
 const router = express.Router();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 function handleValidation(req, res, next) {
   const errors = validationResult(req);
@@ -85,6 +87,36 @@ router.post(
     }
   }
 );
+
+// POST /api/auth/google -- verify a Google Identity Services ID token
+router.post("/google", async (req, res, next) => {
+  try {
+    if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).json({ error: "Google login is not configured" });
+    const { credential, userType } = req.body;
+    if (typeof credential !== "string" || !credential) return res.status(400).json({ error: "Google credential is required" });
+    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+    const payload = ticket.getPayload();
+    if (!payload?.sub || !payload.email || !payload.email_verified) return res.status(401).json({ error: "Google account could not be verified" });
+
+    let user = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+    if (!user) {
+      const safeUserType = ["OWNER", "AGENT"].includes(userType) ? userType : "TENANT";
+      user = await prisma.user.create({
+        data: {
+          name: payload.name || payload.email.split("@")[0],
+          email: payload.email.toLowerCase(),
+          passwordHash: await bcrypt.hash(`${payload.sub}:${process.env.JWT_SECRET || "dev-secret-change-me"}`, 10),
+          userType: safeUserType,
+          profilePhotoUrl: payload.picture || null,
+          isPhoneVerified: false,
+        },
+      });
+    }
+    res.json({ token: signToken(user), user: publicUser(user) });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // GET /api/auth/me
 router.get("/me", requireAuth, async (req, res, next) => {

@@ -36,6 +36,7 @@ any of them built out next.
 
 1. Install PostgreSQL locally (or use a hosted instance — Neon, Supabase, Railway all work).
 2. `cp .env.example .env` and fill in `DATABASE_URL` and `JWT_SECRET`.
+  Keep `GOOGLE_CLIENT_ID` set to the Web application Client ID configured in Google Cloud Console.
 3. Install dependencies and generate the Prisma client:
 
    ```bash
@@ -66,9 +67,8 @@ The API runs on `http://localhost:4000` by default. Health check: `GET /api/heal
 ## Demo accounts (password for all: `password123`)
 
 - Admin: `admin@flatfinder.in`
-- Tenant: `tenant@flatfinder.in`
-- Owners: `owner1@flatfinder.in` … `owner4@flatfinder.in`
-- Agent: `owner4@flatfinder.in` (every 4th seeded owner is an AGENT)
+- Owners: `owner2@flatfinder.in` … `owner5@flatfinder.in`
+- Agent: `owner4@flatfinder.in`
 
 ## Key endpoints
 

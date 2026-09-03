@@ -3,14 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ApiError } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-
-const DEMO_ACCOUNTS = [
-  { label: "Tenant demo", email: "tenant@flatfinder.in", password: "password123" },
-  { label: "Owner demo", email: "owner1@flatfinder.in", password: "password123" },
-];
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,11 +20,6 @@ export default function Login() {
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setForm((current) => ({ ...current, [field]: event.target.value }));
     };
-
-  const fillDemoAccount = (email: string, password: string) => {
-    setForm({ email, password });
-    setError(null);
-  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +41,16 @@ export default function Login() {
       setError(err instanceof ApiError ? err.message : "Couldn't log in right now.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleGoogleLogin(credential: string) {
+    try {
+      await googleLogin(credential);
+      notify("Welcome to FlatFinder!", "success");
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Google sign-in failed. Please try again.");
     }
   }
 
@@ -100,21 +101,9 @@ export default function Login() {
         </button>
       </form>
 
-      <div className="mt-6 rounded-xl border border-line bg-white p-3 text-xs text-ink-soft">
-        <p className="mb-2">Quick demo access:</p>
-        <div className="flex flex-wrap gap-2">
-          {DEMO_ACCOUNTS.map((account) => (
-            <button
-              key={account.email}
-              type="button"
-              onClick={() => fillDemoAccount(account.email, account.password)}
-              className="rounded-full border border-line bg-primary-soft px-2.5 py-1.5 text-[11px] font-medium text-primary hover:border-primary"
-            >
-              {account.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <div className="my-5 flex items-center gap-3 text-xs text-ink-soft"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
+      <GoogleLoginButton onCredential={handleGoogleLogin} disabled={submitting} />
+
     </div>
   );
 }

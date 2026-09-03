@@ -64,6 +64,8 @@ export const api = {
       request<{ token: string; user: User }>("/auth/register", { method: "POST", body: JSON.stringify(payload) }),
     login: (payload: { email: string; password: string }) =>
       request<{ token: string; user: User }>("/auth/login", { method: "POST", body: JSON.stringify(payload) }),
+    google: (credential: string, userType = "TENANT") =>
+      request<{ token: string; user: User }>("/auth/google", { method: "POST", body: JSON.stringify({ credential, userType }) }),
     me: () => request<{ user: User }>("/auth/me"),
     updateMe: (payload: Partial<User>) =>
       request<{ user: User }>("/auth/me", { method: "PUT", body: JSON.stringify(payload) }),

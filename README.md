@@ -36,11 +36,9 @@ npm install
 npm run dev                 # http://localhost:5173
 ```
 
-Open `http://localhost:5173`. Log in with one of the seeded demo accounts
-(password `password123` for all):
+Open `http://localhost:5173`. Log in with the seeded admin account
+(password `password123`):
 
-- Tenant: `tenant@flatfinder.in`
-- Owner: `owner1@flatfinder.in` (post/manage listings, view enquiries)
 - Admin: `admin@flatfinder.in`
 
 ## What's real vs. what's stubbed
@@ -60,4 +58,4 @@ model already supports most of these — happy to build any of them out next.
 - **Backend:** Render or Railway — root directory `backend`, build command
   `npm install && npx prisma generate && npx prisma migrate deploy`,
   start command `npm start`. Add a Postgres instance and set the env vars from
-  `.env.example`, plus `CORS_ORIGIN` pointing at your deployed frontend URL.
+  `.env.example`, including `GOOGLE_CLIENT_ID`, plus `CORS_ORIGIN` pointing at your deployed frontend URL.

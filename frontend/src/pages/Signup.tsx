@@ -4,6 +4,7 @@ import { ApiError } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { inputClass, Field } from "./Login";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
 const USER_TYPES = [
   { value: "TENANT", label: "Tenant" },
@@ -12,7 +13,7 @@ const USER_TYPES = [
 ];
 
 export default function Signup() {
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
 
@@ -57,6 +58,16 @@ export default function Signup() {
       setError(err instanceof ApiError ? err.message : "Couldn't create your account right now.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleGoogleSignup(credential: string) {
+    try {
+      await googleLogin(credential, userType);
+      notify("Account created — welcome to FlatFinder!", "success");
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Google sign-up failed. Please try again.");
     }
   }
 
@@ -120,6 +131,8 @@ export default function Signup() {
           {submitting ? "Creating account..." : "Sign up"}
         </button>
       </form>
+      <div className="my-5 flex items-center gap-3 text-xs text-ink-soft"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
+      <GoogleLoginButton onCredential={handleGoogleSignup} disabled={submitting} />
     </div>
   );
 }

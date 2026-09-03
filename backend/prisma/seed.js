@@ -67,7 +67,7 @@ async function main() {
   });
 
   const owners = [];
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 2; i <= 5; i++) {
     const owner = await prisma.user.upsert({
       where: { email: `owner${i}@flatfinder.in` },
       update: {},
@@ -82,21 +82,6 @@ async function main() {
     });
     owners.push(owner);
   }
-
-  const tenant = await prisma.user.upsert({
-    where: { email: "tenant@flatfinder.in" },
-    update: {},
-    create: {
-      name: "Ajeem (Demo Tenant)",
-      email: "tenant@flatfinder.in",
-      phone: "9876500000",
-      passwordHash,
-      userType: "TENANT",
-      preferredLocation: "Jaipur",
-      budgetMin: 8000,
-      budgetMax: 25000,
-    },
-  });
 
   const amenityRecords = {};
   for (const name of AMENITIES) {
@@ -169,7 +154,6 @@ async function main() {
   console.log(`Seed complete. ${created} properties created.`);
   console.log("Demo logins (password for all: password123):");
   console.log(`  Admin:  ${admin.email}`);
-  console.log(`  Tenant: ${tenant.email}`);
   owners.forEach((o) => console.log(`  ${o.userType === "AGENT" ? "Agent" : "Owner"}:  ${o.email}`));
 }
 
