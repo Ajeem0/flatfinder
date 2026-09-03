@@ -69,6 +69,8 @@ export const api = {
     me: () => request<{ user: User }>("/auth/me"),
     updateMe: (payload: Partial<User>) =>
       request<{ user: User }>("/auth/me", { method: "PUT", body: JSON.stringify(payload) }),
+    updateAdminPassword: (payload: { currentPassword: string; newPassword: string }) =>
+      request<{ message: string }>("/auth/admin/password", { method: "PUT", body: JSON.stringify(payload) }),
   },
   properties: {
     search: (params: URLSearchParams) => request<PropertySearchResponse>(`/properties?${params.toString()}`),

@@ -45,6 +45,10 @@ function AdminProfile() {
   const { notify } = useToast();
   const [phone, setPhone] = useState(user?.adminPhone || "");
   const [saving, setSaving] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
 
   async function savePhone() {
     setSaving(true);
@@ -56,6 +60,23 @@ function AdminProfile() {
       notify("Could not update admin phone number", "error");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function savePassword() {
+    if (newPassword.length < 6) return notify("New password must be at least 6 characters", "error");
+    if (newPassword !== confirmPassword) return notify("New passwords do not match", "error");
+    setSavingPassword(true);
+    try {
+      await api.auth.updateAdminPassword({ currentPassword, newPassword });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      notify("Admin password updated", "success");
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "Could not update admin password", "error");
+    } finally {
+      setSavingPassword(false);
     }
   }
 
@@ -71,6 +92,17 @@ function AdminProfile() {
         <button onClick={savePhone} disabled={saving} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
           {saving ? "Saving..." : "Save number"}
         </button>
+      </div>
+      <div className="mt-6 border-t border-line pt-5">
+        <h3 className="font-display text-base font-semibold text-ink">Change admin password</h3>
+        <div className="mt-3 grid max-w-md gap-3">
+          <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Current password" autoComplete="current-password" className="w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="New password (6+ characters)" autoComplete="new-password" className="w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Confirm new password" autoComplete="new-password" className="w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <button onClick={savePassword} disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword} className="w-fit rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary disabled:opacity-50">
+            {savingPassword ? "Updating..." : "Update password"}
+          </button>
+        </div>
       </div>
     </section>
   );
