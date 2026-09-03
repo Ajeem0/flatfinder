@@ -21,6 +21,7 @@ export default function PhoneNumberPrompt() {
   if (!user || visibleFor !== user.id) return null;
   const currentUser = user;
   const currentPhone = currentUser.userType === "ADMIN" ? currentUser.adminPhone : currentUser.phone;
+  if (currentPhone) return null;
 
   async function savePhone(event: React.FormEvent) {
     event.preventDefault();
