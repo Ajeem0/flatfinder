@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useScrollReveal } from "./Reveal";
+import PhoneNumberPrompt from "./PhoneNumberPrompt";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
@@ -20,6 +21,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         {children}
       </main>
       <Footer />
+      <PhoneNumberPrompt />
     </div>
   );
 }

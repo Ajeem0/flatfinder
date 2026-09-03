@@ -102,7 +102,23 @@ export const api = {
     list: () => request<{ results: CityWithLocalities[] }>("/locations"),
   },
   admin: {
-    users: () => request<{ results: Array<{ id: string; name: string; email: string; phone: string | null; userType: string }> }>("/admin/users"),
+    users: () => request<{ results: Array<{
+      id: string;
+      name: string;
+      email: string;
+      phone: string | null;
+      adminPhone: string | null;
+      userType: string;
+      profilePhotoUrl: string | null;
+      isPhoneVerified: boolean;
+      preferredLocation: string | null;
+      budgetMin: number | null;
+      budgetMax: number | null;
+      propertyPreference: string | null;
+      createdAt: string;
+      updatedAt: string;
+      _count: { properties: number; favorites: number; enquiriesSent: number; visits: number; messages: number; conversationsStarted: number; conversationsReceived: number };
+    }> }>("/admin/users"),
     updateUserPhone: (id: string, phone: string) =>
       request<{ user: { id: string; phone: string | null } }>(`/admin/users/${id}/phone`, { method: "PUT", body: JSON.stringify({ phone }) }),
     pendingProperties: () => request<{ results: Property[] }>("/admin/properties/pending"),

@@ -4,13 +4,28 @@ const { requireAuth, requireUserType } = require("../middleware/auth");
 
 const router = express.Router();
 
-// GET /api/admin/users -- users who can own properties
+// GET /api/admin/users -- all users, excluding authentication secrets
 router.get("/users", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
   try {
     const users = await prisma.user.findMany({
-      where: { userType: { in: ["OWNER", "AGENT"] } },
-      select: { id: true, name: true, email: true, phone: true, userType: true },
-      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        adminPhone: true,
+        userType: true,
+        profilePhotoUrl: true,
+        isPhoneVerified: true,
+        preferredLocation: true,
+        budgetMin: true,
+        budgetMax: true,
+        propertyPreference: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: { select: { properties: true, favorites: true, enquiriesSent: true, visits: true, messages: true, conversationsStarted: true, conversationsReceived: true } },
+      },
+      orderBy: { createdAt: "desc" },
     });
     res.json({ results: users });
   } catch (err) {

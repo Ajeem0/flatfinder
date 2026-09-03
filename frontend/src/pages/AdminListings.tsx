@@ -10,6 +10,7 @@ export default function AdminListings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { notify } = useToast();
   const view = searchParams.get("view") === "all" ? "all" : "pending";
+  const [users, setUsers] = useState<Awaited<ReturnType<typeof api.admin.users>>["results"] | null>(null);
 
   async function load() {
     try {
@@ -21,6 +22,11 @@ export default function AdminListings() {
   }
 
   useEffect(() => { load(); }, [view]);
+
+  useEffect(() => {
+    if (searchParams.get("view") !== "users") return;
+    api.admin.users().then((res) => setUsers(res.results)).catch(() => setUsers([]));
+  }, [searchParams]);
 
   async function approve(id: string) {
     try {
@@ -59,7 +65,7 @@ export default function AdminListings() {
         <div>
           <h1 className="font-display text-2xl font-semibold">Admin properties</h1>
           <p className="text-sm text-ink-soft mt-0.5">
-            {view === "all" ? "All properties in the system" : "Pending listings waiting for review"}
+            {searchParams.get("view") === "users" ? "All registered users and their account activity" : view === "all" ? "All properties in the system" : "Pending listings waiting for review"}
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-line p-1">
@@ -75,9 +81,48 @@ export default function AdminListings() {
           >
             All properties
           </button>
+          <button
+            onClick={() => setSearchParams({ view: "users" })}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${searchParams.get("view") === "users" ? "bg-primary text-white" : "text-ink-soft"}`}
+          >
+            All users
+          </button>
         </div>
       </div>
-      {listings === null ? (
+      {searchParams.get("view") === "users" ? (
+        users === null ? <p>Loading users...</p> : users.length === 0 ? <p>No users found</p> : (
+          <div className="space-y-4">
+            {users.map((user) => (
+              <div key={user.id} className="rounded-xl border border-line bg-white p-4">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-semibold text-ink">{user.name}</h2>
+                      <span className="rounded-full bg-primary-soft px-2 py-1 text-[11px] font-semibold text-primary">{user.userType}</span>
+                      {user.isPhoneVerified && <span className="text-xs font-medium text-verified">Phone verified</span>}
+                    </div>
+                    <p className="mt-1 text-sm text-ink-soft">{user.email}</p>
+                    <p className="mt-1 text-sm text-ink">Phone: {user.phone || user.adminPhone || "Not provided"}</p>
+                    <p className="mt-1 text-xs text-ink-soft">Joined {new Date(user.createdAt).toLocaleDateString("en-IN")}</p>
+                  </div>
+                  <div className="text-sm text-ink-soft">
+                    <p>Location: {user.preferredLocation || "Not set"}</p>
+                    <p>Budget: {user.budgetMin ?? "—"} - {user.budgetMax ?? "—"}</p>
+                    <p>Preference: {user.propertyPreference || "Not set"}</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2 border-t border-line pt-3 text-xs text-ink-soft sm:grid-cols-4">
+                  <span>Properties: {user._count.properties}</span>
+                  <span>Favorites: {user._count.favorites}</span>
+                  <span>Enquiries: {user._count.enquiriesSent}</span>
+                  <span>Messages: {user._count.messages}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : (
+        listings === null ? (
         <p>Loading...</p>
       ) : listings.length === 0 ? (
         <p>{view === "all" ? "No properties found" : "No pending listings"}</p>
@@ -115,6 +160,7 @@ export default function AdminListings() {
             </div>
           ))}
         </div>
+        )
       )}
     </div>
   );
