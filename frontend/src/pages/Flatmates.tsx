@@ -57,12 +57,6 @@ export default function Flatmates() {
     if (!user) return notify("Log in to chat with the poster.", "info");
     try {
       const { conversation } = await api.chats.start(property.id);
-      if (conversation.messages.length === 0) {
-        await api.chats.send(
-          conversation.id,
-          `Hi, I'm ${user.name}. I want to flatmate at this property. Is it still available?`
-        );
-      }
       navigate(`/messages?conversation=${conversation.id}`);
     } catch (err) {
       notify(err instanceof ApiError ? err.message : "Could not start this chat.", "error");

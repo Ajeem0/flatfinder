@@ -42,6 +42,7 @@ router.post(
       const listing = await prisma.property.findUnique({ where: { id: req.body.propertyId } });
       if (!listing) return res.status(404).json({ error: "Listing not found" });
       if (listing.ownerId === req.user.id) return res.status(400).json({ error: "You cannot chat with yourself" });
+      const sender = await prisma.user.findUnique({ where: { id: req.user.id }, select: { name: true } });
       const blocked = await prisma.blockedUser.findUnique({ where: { blockerId_blockedId: { blockerId: listing.ownerId, blockedId: req.user.id } } });
       if (blocked) return res.status(403).json({ error: "This user is unavailable" });
       const conversation = await prisma.conversation.upsert({
@@ -50,7 +51,18 @@ router.post(
         update: {},
         include: conversationInclude(),
       });
-      res.status(201).json({ conversation });
+      if (conversation.messages.length === 0) {
+        await prisma.message.create({
+          data: {
+            conversationId: conversation.id,
+            senderId: req.user.id,
+            body: `Hi, I'm ${sender?.name || "interested"}. I want to flatmate at this property. Is it still available?`,
+          },
+        });
+        await prisma.conversation.update({ where: { id: conversation.id }, data: { updatedAt: new Date() } });
+      }
+      const refreshedConversation = await prisma.conversation.findUnique({ where: { id: conversation.id }, include: conversationInclude() });
+      res.status(201).json({ conversation: refreshedConversation });
     } catch (err) { next(err); }
   }
 );
