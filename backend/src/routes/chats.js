@@ -78,6 +78,7 @@ router.post(
       const blocked = await prisma.blockedUser.findUnique({ where: { blockerId_blockedId: { blockerId: otherUserId, blockedId: req.user.id } } });
       if (blocked) return res.status(403).json({ error: "This user is unavailable" });
       const message = await prisma.message.create({ data: { conversationId: conversation.id, senderId: req.user.id, body: req.body.body.trim(), attachmentUrl: req.body.attachmentUrl || null }, include: { sender: { select: userSelect } } });
+      await prisma.conversation.update({ where: { id: conversation.id }, data: { updatedAt: new Date() } });
       res.status(201).json({ message });
     } catch (err) { next(err); }
   }

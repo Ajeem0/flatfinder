@@ -13,7 +13,6 @@ export default function Flatmates() {
   const [city, setCity] = useState("");
   const [maxRent, setMaxRent] = useState("");
   const [query, setQuery] = useState("");
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { notify } = useToast();
@@ -54,14 +53,16 @@ export default function Flatmates() {
     setQuery("");
   }
 
-  function selectProperty(property: Property) {
-    setSelectedProperty((current) => (current?.id === property.id ? null : property));
-  }
-
   async function chatWithPoster(property: Property) {
     if (!user) return notify("Log in to chat with the poster.", "info");
     try {
       const { conversation } = await api.chats.start(property.id);
+      if (conversation.messages.length === 0) {
+        await api.chats.send(
+          conversation.id,
+          `Hi, I'm ${user.name}. I want to flatmate at this property. Is it still available?`
+        );
+      }
       navigate(`/messages?conversation=${conversation.id}`);
     } catch (err) {
       notify(err instanceof ApiError ? err.message : "Could not start this chat.", "error");
@@ -101,22 +102,10 @@ export default function Flatmates() {
       ) : error ? (
         <ErrorState message={error} />
       ) : results.length === 0 ? (
-        <EmptyState title="No flatmate listings match" description="Try a different city or budget, or post a listing if you're looking for a roommate." action={<button onClick={clearFilters} className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white">Clear filters</button>} />
+        <EmptyState title="No properties match" description="Try a different city, search term, or budget." action={<button onClick={clearFilters} className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white">Clear filters</button>} />
       ) : (
         <>
-          {selectedProperty && (
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary-soft px-4 py-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">Selected property</p>
-                <p className="mt-0.5 text-sm font-medium text-ink">{selectedProperty.title}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <button type="button" onClick={() => setSelectedProperty(null)} className="text-xs font-semibold text-ink-soft hover:text-ink">Change</button>
-                <button type="button" onClick={() => navigate(`/property/${selectedProperty.slug}`)} className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white">Continue</button>
-              </div>
-            </div>
-          )}
-          <p className="mb-4 text-sm text-ink-soft">{results.length} flatmate {results.length === 1 ? "listing" : "listings"}</p>
+          <p className="mb-4 text-sm text-ink-soft">{results.length} {results.length === 1 ? "property" : "properties"} available to flatmate</p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {results.map((p) => (
               <PropertyCard
@@ -124,9 +113,8 @@ export default function Flatmates() {
                 property={p}
                 onToggleFavorite={toggleFavorite}
                 onChat={chatWithPoster}
-                onSelect={selectProperty}
+                onSelect={chatWithPoster}
                 selectLabel="I want flatmates"
-                selected={selectedProperty?.id === p.id}
               />
             ))}
           </div>

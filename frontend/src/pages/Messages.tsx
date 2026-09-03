@@ -34,7 +34,11 @@ export default function Messages() {
     catch { notify("Could not load this conversation.", "error"); }
   }
 
-  useEffect(() => { loadConversations(); }, []);
+  useEffect(() => {
+    loadConversations();
+    const interval = window.setInterval(loadConversations, 3000);
+    return () => window.clearInterval(interval);
+  }, []);
   useEffect(() => {
     if (!selected) return;
     loadMessages(selected.id);
