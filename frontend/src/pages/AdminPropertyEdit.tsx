@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, X } from "lucide-react";
 import { api, ApiError } from "../lib/api";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 import { AMENITY_LIST } from "../pages/PostProperty";
 import type { Property } from "../types";
 
@@ -60,6 +61,7 @@ export default function AdminPropertyEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { notify } = useToast();
+  const { user } = useAuth();
   const [form, setForm] = useState<FormState | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -114,7 +116,9 @@ export default function AdminPropertyEdit() {
         totalFloors: form.totalFloors ? Number(form.totalFloors) : null,
         ownerId: form.ownerId,
       });
-      if (form.ownerId) await api.admin.updateUserPhone(String(form.ownerId), String(form.ownerPhone || ""));
+      if (form.ownerId && owners.some((owner) => owner.id === form.ownerId)) {
+        await api.admin.updateUserPhone(String(form.ownerId), String(form.ownerPhone || ""));
+      }
       notify("Property updated successfully", "success");
       navigate("/admin/listings?view=all");
     } catch (err) {
@@ -143,8 +147,9 @@ export default function AdminPropertyEdit() {
           <label className="text-sm font-medium text-ink">Furnishing<select value={String(form.furnishing)} onChange={(event) => update({ furnishing: event.target.value })} className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal"><option>FURNISHED</option><option>SEMI_FURNISHED</option><option>UNFURNISHED</option></select></label>
         </div></section>
         <section><h2 className="mb-3 font-display text-lg font-semibold">Owner</h2><div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {user && form.ownerId !== user.id && <button type="button" onClick={() => update({ ownerId: user.id, ownerPhone: "" })} className="rounded-lg border border-primary bg-primary-soft px-3 py-2.5 text-left text-sm font-semibold text-primary sm:col-span-2">Make this listing mine<span className="mt-0.5 block text-xs font-normal">Assign this property to {user.name} ({user.email})</span></button>}
           <label className="text-sm font-medium text-ink">Assigned owner<select value={String(form.ownerId)} onChange={(event) => { const owner = owners.find((item) => item.id === event.target.value); update({ ownerId: event.target.value, ownerPhone: owner?.phone || "" }); }} className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal"><option value="">Select owner</option>{owners.map((owner) => <option key={owner.id} value={owner.id}>{owner.name} ({owner.userType.toLowerCase()})</option>)}</select></label>
-          <label className="text-sm font-medium text-ink">Owner phone<input type="tel" value={String(form.ownerPhone || "")} onChange={(event) => update({ ownerPhone: event.target.value })} placeholder="+91 98765 43210" className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal outline-none focus:border-primary" /></label>
+          <label className="text-sm font-medium text-ink">Owner phone<input type="tel" value={String(form.ownerPhone || "")} onChange={(event) => update({ ownerPhone: event.target.value })} placeholder="+91 98765 43210" disabled={form.ownerId === user?.id} className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal outline-none focus:border-primary disabled:bg-canvas disabled:text-ink-soft" /></label>
         </div></section>
         <label className="block text-sm font-medium text-ink">Description<textarea value={String(form.description)} onChange={(event) => update({ description: event.target.value })} rows={6} className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal outline-none focus:border-primary" /></label>
         <section><h2 className="mb-3 font-display text-lg font-semibold">Amenities</h2><div className="flex flex-wrap gap-2">{AMENITY_LIST.map((amenity) => { const active = form.amenities.includes(amenity); return <button type="button" key={amenity} onClick={() => update({ amenities: active ? form.amenities.filter((item) => item !== amenity) : [...form.amenities, amenity] })} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "border-primary bg-primary-soft text-primary" : "border-line text-ink-soft"}`}>{amenity}</button>; })}</div></section>
