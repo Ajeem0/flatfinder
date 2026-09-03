@@ -5,6 +5,11 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 
+const GOOGLE_USER_TYPES = [
+  { value: "TENANT", label: "Tenant" },
+  { value: "OWNER", label: "Owner" },
+];
+
 export default function Login() {
   const { login, googleLogin } = useAuth();
   const { notify } = useToast();
@@ -13,6 +18,7 @@ export default function Login() {
   const from = (location.state as { from?: Location })?.from?.pathname || "/dashboard";
 
   const [form, setForm] = useState({ email: "", password: "" });
+  const [googleUserType, setGoogleUserType] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,9 +50,9 @@ export default function Login() {
     }
   }
 
-  async function handleGoogleLogin(credential: string) {
+  async function handleGoogleLogin(credential: string, userType: string) {
     try {
-      await googleLogin(credential);
+      await googleLogin(credential, userType);
       notify("Welcome to FlatFinder!", "success");
       navigate(from, { replace: true });
     } catch (err) {
@@ -102,7 +108,29 @@ export default function Login() {
       </form>
 
       <div className="my-5 flex items-center gap-3 text-xs text-ink-soft"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
-      <GoogleLoginButton onCredential={handleGoogleLogin} disabled={submitting} />
+      <div className="rounded-xl border border-line bg-white p-4">
+        <p className="mb-3 text-sm font-semibold text-ink">Continue with Google as</p>
+        <div className="grid grid-cols-2 gap-2">
+          {GOOGLE_USER_TYPES.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              onClick={() => setGoogleUserType(option.value)}
+              aria-pressed={googleUserType === option.value}
+              className={`rounded-lg border px-3 py-2.5 text-sm font-medium ${googleUserType === option.value ? "border-primary bg-primary-soft text-primary" : "border-line text-ink"}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {googleUserType ? (
+          <div className="mt-4">
+            <GoogleLoginButton onCredential={(credential) => handleGoogleLogin(credential, googleUserType)} disabled={submitting} />
+          </div>
+        ) : (
+          <p className="mt-3 text-center text-xs text-ink-soft">Select your account type to continue.</p>
+        )}
+      </div>
 
     </div>
   );
