@@ -12,6 +12,8 @@ const USER_TYPES = [
   { value: "AGENT", label: "Agent" },
 ];
 
+const GOOGLE_USER_TYPES = USER_TYPES.filter((option) => option.value !== "AGENT");
+
 export default function Signup() {
   const { register, googleLogin } = useAuth();
   const { notify } = useToast();
@@ -19,6 +21,7 @@ export default function Signup() {
 
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [userType, setUserType] = useState("TENANT");
+  const [googleUserType, setGoogleUserType] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -61,9 +64,9 @@ export default function Signup() {
     }
   }
 
-  async function handleGoogleSignup(credential: string) {
+  async function handleGoogleSignup(credential: string, selectedUserType: string) {
     try {
-      await googleLogin(credential, userType);
+      await googleLogin(credential, selectedUserType);
       notify("Account created — welcome to FlatFinder!", "success");
       navigate("/dashboard");
     } catch (err) {
@@ -132,7 +135,29 @@ export default function Signup() {
         </button>
       </form>
       <div className="my-5 flex items-center gap-3 text-xs text-ink-soft"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
-      <GoogleLoginButton onCredential={handleGoogleSignup} disabled={submitting} />
+      <div className="rounded-xl border border-line bg-white p-4">
+        <p className="mb-3 text-sm font-semibold text-ink">Sign up with Google as</p>
+        <div className="grid grid-cols-2 gap-2">
+          {GOOGLE_USER_TYPES.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              onClick={() => setGoogleUserType(option.value)}
+              aria-pressed={googleUserType === option.value}
+              className={`rounded-lg border px-3 py-2.5 text-sm font-medium ${googleUserType === option.value ? "border-primary bg-primary-soft text-primary" : "border-line text-ink"}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {googleUserType ? (
+          <div className="mt-4">
+            <GoogleLoginButton onCredential={(credential) => handleGoogleSignup(credential, googleUserType)} disabled={submitting} />
+          </div>
+        ) : (
+          <p className="mt-3 text-center text-xs text-ink-soft">Select your account type to continue.</p>
+        )}
+      </div>
     </div>
   );
 }
