@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, PlusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search } from "lucide-react";
 import PropertyCard from "../components/PropertyCard";
 import { CardSkeletonGrid, EmptyState, ErrorState } from "../components/States";
 import { api, ApiError } from "../lib/api";
@@ -23,7 +23,7 @@ export default function Flatmates() {
     const handle = window.setTimeout(async () => {
       setResults(null);
       setError(null);
-      const params = new URLSearchParams({ propertyType: "FLATMATE", pageSize: "24", sort: "newest" });
+      const params = new URLSearchParams({ pageSize: "24", sort: "newest" });
       if (city.trim()) params.set("city", city.trim());
       if (maxRent) params.set("maxRent", maxRent);
       if (query.trim()) params.set("q", query.trim());
@@ -72,12 +72,9 @@ export default function Flatmates() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 pb-24 lg:pb-8">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink mb-1">Find a flatmate</h1>
-          <p className="text-sm text-ink-soft">Shared rooms and flats looking for a roommate.</p>
+          <h1 className="font-display text-2xl font-semibold text-ink mb-1">Find a property to flatmate</h1>
+          <p className="text-sm text-ink-soft">Browse properties and choose the one where you want to flatmate.</p>
         </div>
-        <Link to="/post-property" className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white">
-          <PlusCircle size={16} /> Post a flatmate listing
-        </Link>
       </div>
 
       <form onSubmit={(event) => event.preventDefault()} className="mb-8 grid grid-cols-1 gap-3 rounded-2xl border border-line bg-white p-4 sm:grid-cols-[1fr_1fr_180px_auto] sm:items-end">
@@ -128,6 +125,7 @@ export default function Flatmates() {
                 onToggleFavorite={toggleFavorite}
                 onChat={chatWithPoster}
                 onSelect={selectProperty}
+                selectLabel="I want flatmates"
                 selected={selectedProperty?.id === p.id}
               />
             ))}

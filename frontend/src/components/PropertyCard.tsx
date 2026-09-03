@@ -10,10 +10,11 @@ interface Props {
   revealDelay?: number;
   onChat?: (property: Property) => void;
   onSelect?: (property: Property) => void;
+  selectLabel?: string;
   selected?: boolean;
 }
 
-export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat, onSelect, selected = false }: Props) {
+export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat, onSelect, selectLabel = "Select property", selected = false }: Props) {
   const cover = property.images[0];
   const isRecentlyApproved =
     property.status === "PUBLISHED" && Date.now() - new Date(property.updatedAt).getTime() < 1000 * 60;
@@ -114,7 +115,7 @@ export default function PropertyCard({ property, onToggleFavorite, favoritePendi
             className={`flex items-center justify-center gap-1 rounded-full px-3 py-2 text-xs font-semibold ${selected ? "bg-primary-soft text-primary" : "bg-primary text-white"}`}
           >
             {selected && <Check size={13} />}
-            {selected ? "Selected" : "Select property"}
+            {selected ? "Selected" : selectLabel}
           </button>
         )}
         {onChat && (
