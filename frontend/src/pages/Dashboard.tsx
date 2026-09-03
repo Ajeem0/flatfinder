@@ -43,13 +43,13 @@ export default function Dashboard() {
 function AdminProfile() {
   const { user, refreshUser } = useAuth();
   const { notify } = useToast();
-  const [phone, setPhone] = useState(user?.phone || "");
+  const [phone, setPhone] = useState(user?.adminPhone || "");
   const [saving, setSaving] = useState(false);
 
   async function savePhone() {
     setSaving(true);
     try {
-      await api.auth.updateMe({ phone: phone.trim() || null });
+      await api.auth.updateMe({ adminPhone: phone.trim() || null });
       await refreshUser();
       notify("Admin phone number updated", "success");
     } catch {

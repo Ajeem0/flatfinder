@@ -79,6 +79,7 @@ model User {
   name               String
   email              String    @unique
   phone              String?   @unique
+  adminPhone         String?
   passwordHash       String
   userType           UserType  @default(TENANT)
   profilePhotoUrl    String?

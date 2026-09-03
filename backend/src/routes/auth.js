@@ -20,6 +20,7 @@ const publicUser = (u) => ({
   name: u.name,
   email: u.email,
   phone: u.phone,
+  adminPhone: u.adminPhone,
   userType: u.userType,
   profilePhotoUrl: u.profilePhotoUrl,
   preferredLocation: u.preferredLocation,
@@ -99,10 +100,19 @@ router.get("/me", requireAuth, async (req, res, next) => {
 // PUT /api/auth/me
 router.put("/me", requireAuth, async (req, res, next) => {
   try {
-    const { name, phone, profilePhotoUrl, preferredLocation, budgetMin, budgetMax, propertyPreference } = req.body;
+    const { name, phone, adminPhone, profilePhotoUrl, preferredLocation, budgetMin, budgetMax, propertyPreference } = req.body;
     const user = await prisma.user.update({
       where: { id: req.user.id },
-      data: { name, phone, profilePhotoUrl, preferredLocation, budgetMin, budgetMax, propertyPreference },
+      data: {
+        name,
+        phone: req.user.userType === "ADMIN" ? undefined : phone,
+        adminPhone: req.user.userType === "ADMIN" ? adminPhone : undefined,
+        profilePhotoUrl,
+        preferredLocation,
+        budgetMin,
+        budgetMax,
+        propertyPreference,
+      },
     });
     res.json({ user: publicUser(user) });
   } catch (err) {
