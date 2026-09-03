@@ -53,6 +53,18 @@ enum VisitStatus {
   CANCELLED
 }
 
+enum FlatmateListingType {
+  LOOKING_FOR_FLATMATE
+  OFFERING_FLAT
+  LOOKING_FOR_FLAT
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
 model City {
   id        String     @id @default(cuid())
   name      String     @unique
@@ -75,70 +87,87 @@ model Location {
 }
 
 model User {
-  id                 String    @id @default(cuid())
+  id                 String        @id @default(cuid())
   name               String
-  email              String    @unique
-  phone              String?   @unique
+  email              String        @unique
+  phone              String?       @unique
   adminPhone         String?
   passwordHash       String
-  userType           UserType  @default(TENANT)
+  userType           UserType      @default(TENANT)
   profilePhotoUrl    String?
-  isPhoneVerified    Boolean   @default(false)
+  isPhoneVerified    Boolean       @default(false)
   preferredLocation  String?
-  budgetMin           Int?
-  budgetMax           Int?
+  budgetMin          Int?
+  budgetMax          Int?
   propertyPreference String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  messages           Message[]
+  blockedUsers       BlockedUser[] @relation("Blocker")
+  blockedBy          BlockedUser[] @relation("Blocked")
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
-  properties Property[] @relation("OwnerProperties")
-  favorites  Favorite[]
-  enquiriesSent     Enquiry[]  @relation("EnquiriesSent")
-  visits            Visit[]    @relation("VisitsRequested")
-  reportsFiled      Report[]   @relation("ReportsFiled")
+  properties            Property[]     @relation("OwnerProperties")
+  favorites             Favorite[]
+  enquiriesSent         Enquiry[]      @relation("EnquiriesSent")
+  visits                Visit[]        @relation("VisitsRequested")
+  reportsFiled          Report[]       @relation("ReportsFiled")
+  conversationsStarted  Conversation[] @relation("ConversationStarter")
+  conversationsReceived Conversation[] @relation("ConversationRecipient")
 }
 
 model Property {
-  id               String            @id @default(cuid())
-  slug             String            @unique
-  title            String
-  description      String
-  propertyType     PropertyType
-  bhk              Int?
-  areaSqft         Int?
-  floor            Int?
-  totalFloors      Int?
-  furnishing       FurnishingStatus  @default(UNFURNISHED)
-  propertyAgeYears Int?
-  monthlyRent      Int
-  securityDeposit  Int               @default(0)
-  maintenance      Int               @default(0)
-  brokerage        Int               @default(0)
-  noBrokerage      Boolean           @default(false)
-  bachelorFriendly Boolean           @default(true)
-  familyFriendly   Boolean           @default(true)
-  petFriendly      Boolean           @default(false)
-  availableFrom    DateTime?
-  status           ListingStatus     @default(PENDING)
-  viewCount        Int               @default(0)
-  address          String?
-  pincode          String?
-  latitude         Float?
-  longitude        Float?
+  id                 String               @id @default(cuid())
+  slug               String               @unique
+  title              String
+  description        String
+  propertyType       PropertyType
+  bhk                Int?
+  areaSqft           Int?
+  floor              Int?
+  totalFloors        Int?
+  furnishing         FurnishingStatus     @default(UNFURNISHED)
+  propertyAgeYears   Int?
+  monthlyRent        Int
+  securityDeposit    Int                  @default(0)
+  maintenance        Int                  @default(0)
+  brokerage          Int                  @default(0)
+  noBrokerage        Boolean              @default(false)
+  bachelorFriendly   Boolean              @default(true)
+  familyFriendly     Boolean              @default(true)
+  petFriendly        Boolean              @default(false)
+  availableFrom      DateTime?
+  status             ListingStatus        @default(PENDING)
+  viewCount          Int                  @default(0)
+  address            String?
+  pincode            String?
+  latitude           Float?
+  longitude          Float?
+  listingType        FlatmateListingType?
+  roomType           String?
+  existingFlatmates  Int?
+  preferredGender    String?
+  preferredAgeRange  String?
+  occupation         String?
+  foodPreference     String?
+  smokingPreference  String?
+  drinkingPreference String?
+  petsPreference     String?
+  contactPreference  String?
 
-  owner    User   @relation("OwnerProperties", fields: [ownerId], references: [id])
-  ownerId  String
+  owner   User   @relation("OwnerProperties", fields: [ownerId], references: [id])
+  ownerId String
 
   location   Location? @relation(fields: [locationId], references: [id])
   locationId String?
 
-  videoUrl   String?
-  images     PropertyImage[]
-  amenities  PropertyAmenity[]
-  favorites  Favorite[]
-  enquiries  Enquiry[]
-  visits     Visit[]
-  reports    Report[]
+  videoUrl      String?
+  images        PropertyImage[]
+  amenities     PropertyAmenity[]
+  favorites     Favorite[]
+  enquiries     Enquiry[]
+  visits        Visit[]
+  reports       Report[]
+  conversations Conversation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -147,6 +176,48 @@ model Property {
   @@index([bhk])
   @@index([propertyType])
   @@index([status])
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  listing     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId  String
+  starter     User      @relation("ConversationStarter", fields: [starterId], references: [id], onDelete: Cascade)
+  starterId   String
+  recipient   User      @relation("ConversationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  recipientId String
+  messages    Message[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([propertyId, starterId, recipientId])
+  @@index([starterId, updatedAt])
+  @@index([recipientId, updatedAt])
+}
+
+model Message {
+  id             String        @id @default(cuid())
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  sender         User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  senderId       String
+  body           String
+  attachmentUrl  String?
+  status         MessageStatus @default(SENT)
+  createdAt      DateTime      @default(now())
+  deletedAt      DateTime?
+
+  @@index([conversationId, createdAt])
+}
+
+model BlockedUser {
+  blockerId String
+  blockedId String
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
 }
 
 model PropertyImage {
@@ -196,22 +267,22 @@ model Enquiry {
 }
 
 model Visit {
-  id         String      @id @default(cuid())
-  property   Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId String
-  user       User        @relation("VisitsRequested", fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
+  id            String      @id @default(cuid())
+  property      Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId    String
+  user          User        @relation("VisitsRequested", fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
   scheduledDate DateTime
-  status     VisitStatus @default(REQUESTED)
-  createdAt  DateTime    @default(now())
+  status        VisitStatus @default(REQUESTED)
+  createdAt     DateTime    @default(now())
 }
 
 model Report {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId String?
-  reporter   User     @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  reporter   User      @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
   reporterId String
   reason     String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
 }

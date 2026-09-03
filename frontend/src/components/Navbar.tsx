@@ -7,6 +7,7 @@ const navLinks = [
   { to: "/properties", label: "Rent" },
   { to: "/pg", label: "PG" },
   { to: "/flatmates", label: "Flatmates" },
+  { to: "/messages", label: "Messages" },
   { to: "/post-property", label: "Post Property" },
 ];
 

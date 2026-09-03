@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Heart, MapPin, BedDouble, Ruler, Layers, Calendar, BadgeCheck, Phone,
   MessageCircle, CalendarPlus, X,
@@ -19,6 +19,7 @@ const AMENITY_ICONS: Record<string, string> = {
 
 export default function PropertyDetail() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { notify } = useToast();
 
@@ -28,7 +29,6 @@ export default function PropertyDetail() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [visitOpen, setVisitOpen] = useState(false);
   const [visitDate, setVisitDate] = useState("");
-  const [enquirySent, setEnquirySent] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -57,12 +57,22 @@ export default function PropertyDetail() {
     if (!user) return notify("Log in to contact the owner.", "info");
     try {
       await api.enquiries.create({ propertyId: property.id, message: "Hi, I'm interested in this property. Is it still available?" });
-      setEnquirySent(true);
       notify("Enquiry sent — the owner's number is now visible below.", "success");
       const res = await api.properties.get(property.slug);
       setProperty(res.property);
     } catch {
       notify("Couldn't send your enquiry right now.", "error");
+    }
+  }
+
+  async function chatWithOwner() {
+    if (!property) return;
+    if (!user) return notify("Log in to chat with the poster.", "info");
+    try {
+      const { conversation } = await api.chats.start(property.id);
+      navigate(`/messages?conversation=${conversation.id}`);
+    } catch (err) {
+      notify(err instanceof ApiError ? err.message : "Could not start this chat.", "error");
     }
   }
 
@@ -202,6 +212,21 @@ export default function PropertyDetail() {
               <MapPin size={16} className="mr-1.5" /> {property.address || `${property.locationName}, ${property.city}`}
             </div>
           </Section>
+
+          {property.propertyType === "FLATMATE" && (
+            <Section title="Flatmate preferences">
+              <dl className="grid grid-cols-2 gap-3 text-sm">
+                <DL label="Listing" value={property.listingType?.replaceAll("_", " ") || "Flatmate listing"} />
+                <DL label="Room" value={property.roomType || "Not specified"} />
+                <DL label="Existing flatmates" value={String(property.existingFlatmates ?? "Not specified")} />
+                <DL label="Gender" value={property.preferredGender || "Any"} />
+                <DL label="Age range" value={property.preferredAgeRange || "Any"} />
+                <DL label="Occupation" value={property.occupation || "Any"} />
+                <DL label="Food" value={property.foodPreference || "Any"} />
+                <DL label="Smoking / drinking" value={`${property.smokingPreference || "Any"} / ${property.drinkingPreference || "Any"}`} />
+              </dl>
+            </Section>
+          )}
         </div>
 
         {/* Owner contact card */}
@@ -238,11 +263,10 @@ export default function PropertyDetail() {
           )}
 
           <button
-            onClick={contactOwner}
-            disabled={enquirySent}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-line py-3 text-sm font-semibold text-ink disabled:opacity-60"
+            onClick={chatWithOwner}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-line py-3 text-sm font-semibold text-ink"
           >
-            <MessageCircle size={16} /> {enquirySent ? "Enquiry sent" : "Chat / Enquire"}
+            <MessageCircle size={16} /> Chat with poster
           </button>
 
           <button

@@ -34,6 +34,17 @@ interface FormState {
   videoUrl: string;
   title: string;
   description: string;
+  listingType: string;
+  roomType: string;
+  existingFlatmates: string;
+  preferredGender: string;
+  preferredAgeRange: string;
+  occupation: string;
+  foodPreference: string;
+  smokingPreference: string;
+  drinkingPreference: string;
+  petsPreference: string;
+  contactPreference: string;
 }
 
 const INITIAL: FormState = {
@@ -60,6 +71,17 @@ const INITIAL: FormState = {
   videoUrl: "",
   title: "",
   description: "",
+  listingType: "OFFERING_FLAT",
+  roomType: "Private Room",
+  existingFlatmates: "",
+  preferredGender: "Any",
+  preferredAgeRange: "Any",
+  occupation: "Any",
+  foodPreference: "Any",
+  smokingPreference: "Any",
+  drinkingPreference: "Any",
+  petsPreference: "Any",
+  contactPreference: "Chat first",
 };
 
 export default function PostProperty() {
@@ -165,6 +187,17 @@ function PostPropertyForm() {
         videoUrl: form.videoUrl || null,
         images: form.images,
         amenities: form.amenities,
+        listingType: form.listingType,
+        roomType: form.roomType,
+        existingFlatmates: Number(form.existingFlatmates) || null,
+        preferredGender: form.preferredGender,
+        preferredAgeRange: form.preferredAgeRange,
+        occupation: form.occupation,
+        foodPreference: form.foodPreference,
+        smokingPreference: form.smokingPreference,
+        drinkingPreference: form.drinkingPreference,
+        petsPreference: form.petsPreference,
+        contactPreference: form.contactPreference,
       });
       notify("Listing submitted — it'll go live after a quick admin review.", "success");
       navigate("/dashboard");
@@ -240,6 +273,8 @@ function PostPropertyForm() {
         {step === 2 && (
           <StepBlock title="Property details">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SelectField label="Listing type" value={form.listingType} onChange={(v) => update({ listingType: v })} options={["LOOKING_FOR_FLATMATE", "OFFERING_FLAT", "LOOKING_FOR_FLAT"]} labels={{ LOOKING_FOR_FLATMATE: "Looking for a flatmate", OFFERING_FLAT: "Offering a flat / room", LOOKING_FOR_FLAT: "Looking for a flat" }} />
+              <SelectField label="Room type" value={form.roomType} onChange={(v) => update({ roomType: v })} options={["Private Room", "Shared Room", "Entire Flat", "PG"]} />
               {form.propertyType !== "PG" && (
                 <SelectField label="BHK" value={form.bhk} onChange={(v) => update({ bhk: v })} options={["1", "2", "3", "4", "5"]} />
               )}
@@ -254,6 +289,22 @@ function PostPropertyForm() {
                 labels={{ FURNISHED: "Furnished", SEMI_FURNISHED: "Semi-furnished", UNFURNISHED: "Unfurnished" }}
               />
               <TextField label="Property age (years)" type="number" value={form.propertyAgeYears} onChange={(v) => update({ propertyAgeYears: v })} placeholder="5" />
+              <TextField label="Existing flatmates" type="number" value={form.existingFlatmates} onChange={(v) => update({ existingFlatmates: v })} placeholder="1" />
+              <SelectField label="Preferred gender" value={form.preferredGender} onChange={(v) => update({ preferredGender: v })} options={["Any", "Women", "Men", "Non-binary"]} />
+              <SelectField label="Preferred age range" value={form.preferredAgeRange} onChange={(v) => update({ preferredAgeRange: v })} options={["Any", "18-24", "25-30", "30+"]} />
+              <SelectField label="Occupation / student status" value={form.occupation} onChange={(v) => update({ occupation: v })} options={["Any", "Student", "Working professional", "Remote worker"]} />
+            </div>
+          </StepBlock>
+        )}
+
+        {step === 3 && form.propertyType === "FLATMATE" && (
+          <StepBlock title="Flatmate preferences">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <SelectField label="Food preference" value={form.foodPreference} onChange={(v) => update({ foodPreference: v })} options={["Any", "Vegetarian", "Non-vegetarian", "Vegan"]} />
+              <SelectField label="Smoking preference" value={form.smokingPreference} onChange={(v) => update({ smokingPreference: v })} options={["Any", "Non-smoker", "Smoker", "Outdoor only"]} />
+              <SelectField label="Drinking preference" value={form.drinkingPreference} onChange={(v) => update({ drinkingPreference: v })} options={["Any", "Never", "Socially", "Often"]} />
+              <SelectField label="Pets preference" value={form.petsPreference} onChange={(v) => update({ petsPreference: v })} options={["Any", "No pets", "Pets welcome", "Pet owner"]} />
+              <SelectField label="Contact preference" value={form.contactPreference} onChange={(v) => update({ contactPreference: v })} options={["Chat first", "Phone after enquiry", "Email"]} />
             </div>
           </StepBlock>
         )}

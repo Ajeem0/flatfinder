@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, PlusCircle } from "lucide-react";
 import PropertyCard from "../components/PropertyCard";
 import { CardSkeletonGrid, EmptyState, ErrorState } from "../components/States";
@@ -16,6 +16,7 @@ export default function Flatmates() {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { notify } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handle = window.setTimeout(async () => {
@@ -50,6 +51,16 @@ export default function Flatmates() {
     setCity("");
     setMaxRent("");
     setQuery("");
+  }
+
+  async function chatWithPoster(property: Property) {
+    if (!user) return notify("Log in to chat with the poster.", "info");
+    try {
+      const { conversation } = await api.chats.start(property.id);
+      navigate(`/messages?conversation=${conversation.id}`);
+    } catch (err) {
+      notify(err instanceof ApiError ? err.message : "Could not start this chat.", "error");
+    }
   }
 
   return (
@@ -94,7 +105,7 @@ export default function Flatmates() {
           <p className="mb-4 text-sm text-ink-soft">{results.length} flatmate {results.length === 1 ? "listing" : "listings"}</p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {results.map((p) => (
-              <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} />
+              <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} onChat={chatWithPoster} />
             ))}
           </div>
         </>

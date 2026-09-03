@@ -17,6 +17,7 @@ import AdminPropertyEdit from "./pages/AdminPropertyEdit";
 import PgFinder from "./pages/PgFinder";
 import Flatmates from "./pages/Flatmates";
 import NotFound from "./pages/NotFound";
+import Messages from "./pages/Messages";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function AppShell() {
@@ -45,6 +46,7 @@ function AppShell() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route
             path="/dashboard"
             element={

@@ -75,6 +75,17 @@ function serializeProperty(p, favoritedIds = new Set()) {
     isFavorited: favoritedIds.has(p.id),
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
+    listingType: p.listingType,
+    roomType: p.roomType,
+    existingFlatmates: p.existingFlatmates,
+    preferredGender: p.preferredGender,
+    preferredAgeRange: p.preferredAgeRange,
+    occupation: p.occupation,
+    foodPreference: p.foodPreference,
+    smokingPreference: p.smokingPreference,
+    drinkingPreference: p.drinkingPreference,
+    petsPreference: p.petsPreference,
+    contactPreference: p.contactPreference,
   };
 }
 
@@ -101,6 +112,10 @@ router.get("/", optionalAuth, async (req, res, next) => {
       attachedBathroom,
       availableFrom,
       ownerListed,
+      roomType,
+      preferredGender,
+      foodPreference,
+      occupation,
       sort = "relevance",
       view, // grid | list (ignored server-side, echoed back for convenience)
       page = "1",
@@ -109,6 +124,15 @@ router.get("/", optionalAuth, async (req, res, next) => {
 
     const where = { status: "PUBLISHED" };
     const smart = q ? parseSmartQuery(q) : {};
+
+    if (q && !smart.locationText && !smart.maxRent && !smart.bhk) {
+      where.OR = [
+        { title: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+        { roomType: { contains: q, mode: "insensitive" } },
+        { occupation: { contains: q, mode: "insensitive" } },
+      ];
+    }
 
     if (city || smart.locationText) {
       const cityName = city || smart.locationText;
@@ -149,6 +173,10 @@ router.get("/", optionalAuth, async (req, res, next) => {
     if (noBrokerage === "true" || smart.noBrokerage) where.noBrokerage = true;
     if (availableFrom) where.availableFrom = { lte: new Date(availableFrom) };
     if (ownerListed === "true") where.owner = { is: { userType: "OWNER" } };
+    if (roomType) where.roomType = roomType;
+    if (preferredGender) where.preferredGender = preferredGender;
+    if (foodPreference) where.foodPreference = foodPreference;
+    if (occupation) where.occupation = occupation;
 
     const amenityFilters = { parking, lift, security, ac, wifi, attachedBathroom }; // eslint-disable-line
     const amenityNameMap = {
@@ -225,6 +253,8 @@ router.post(
         brokerage, noBrokerage, bachelorFriendly, familyFriendly, petFriendly,
         availableFrom, address, pincode, latitude, longitude,
         cityName, locationName, videoUrl, images = [], amenities = [],
+        listingType, roomType, existingFlatmates, preferredGender, preferredAgeRange,
+        occupation, foodPreference, smokingPreference, drinkingPreference, petsPreference, contactPreference,
       } = req.body;
 
       const city = await prisma.city.upsert({
@@ -272,6 +302,17 @@ router.post(
           latitude,
           longitude,
           videoUrl: videoUrl || null,
+          listingType: listingType || null,
+          roomType: roomType || null,
+          existingFlatmates: existingFlatmates == null ? null : Number(existingFlatmates),
+          preferredGender: preferredGender || null,
+          preferredAgeRange: preferredAgeRange || null,
+          occupation: occupation || null,
+          foodPreference: foodPreference || null,
+          smokingPreference: smokingPreference || null,
+          drinkingPreference: drinkingPreference || null,
+          petsPreference: petsPreference || null,
+          contactPreference: contactPreference || null,
           ownerId: req.user.id,
           locationId: location.id,
           // New listings need admin approval before they go live (see spec section 18).
@@ -358,12 +399,16 @@ router.put("/:id", requireAuth, async (req, res, next) => {
       propertyAgeYears, monthlyRent, securityDeposit, maintenance, brokerage,
       noBrokerage, bachelorFriendly, familyFriendly, petFriendly, availableFrom,
       address, pincode, latitude, longitude, videoUrl, images, amenities, cityName, locationName, status, ownerId,
+      listingType, roomType, existingFlatmates, preferredGender, preferredAgeRange, occupation, foodPreference,
+      smokingPreference, drinkingPreference, petsPreference, contactPreference,
     } = req.body;
 
     const data = {
       title, description, bhk, areaSqft, floor, totalFloors, furnishing,
       propertyAgeYears, monthlyRent, securityDeposit, maintenance, brokerage,
       noBrokerage, bachelorFriendly, familyFriendly, petFriendly, address, pincode,
+      listingType, roomType, existingFlatmates, preferredGender, preferredAgeRange, occupation, foodPreference,
+      smokingPreference, drinkingPreference, petsPreference, contactPreference,
     };
     if (availableFrom) data.availableFrom = new Date(availableFrom);
     if (videoUrl !== undefined) data.videoUrl = videoUrl || null;

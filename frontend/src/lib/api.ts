@@ -6,6 +6,8 @@ import type {
   PropertySearchResponse,
   User,
   Visit,
+  Conversation,
+  ChatMessage,
 } from "../types";
 
 const BASE_URL = import.meta.env.API_URL || "https://flatfinder-1.onrender.com/api";
@@ -103,6 +105,13 @@ export const api = {
     allProperties: () => request<{ results: Property[] }>("/admin/properties/all"),
     approveProperty: (id: string) => request<{ property: Property }>(`/admin/properties/${id}/approve`, { method: "POST" }),
     rejectProperty: (id: string) => request<{ property: Property }>(`/admin/properties/${id}/reject`, { method: "POST" }),
+  },
+  chats: {
+    list: () => request<{ results: Conversation[] }>("/chats"),
+    start: (propertyId: string) => request<{ conversation: Conversation }>("/chats", { method: "POST", body: JSON.stringify({ propertyId }) }),
+    messages: (id: string) => request<{ results: ChatMessage[] }>(`/chats/${id}/messages`),
+    send: (id: string, body: string) => request<{ message: ChatMessage }>(`/chats/${id}/messages`, { method: "POST", body: JSON.stringify({ body }) }),
+    block: (id: string) => request<{ blocked: boolean }>(`/chats/${id}/block`, { method: "POST" }),
   },
 };
 

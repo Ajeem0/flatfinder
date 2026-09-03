@@ -1,4 +1,4 @@
-import { Heart, MapPin, BedDouble, Ruler, BadgeCheck } from "lucide-react";
+import { Heart, MapPin, BedDouble, Ruler, BadgeCheck, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Property } from "../types";
 import { formatDate, formatRent, FURNISHING_LABEL } from "../lib/format";
@@ -8,9 +8,10 @@ interface Props {
   onToggleFavorite?: (id: string) => void;
   favoritePending?: boolean;
   revealDelay?: number;
+  onChat?: (property: Property) => void;
 }
 
-export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0 }: Props) {
+export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat }: Props) {
   const cover = property.images[0];
   const isRecentlyApproved =
     property.status === "PUBLISHED" && Date.now() - new Date(property.updatedAt).getTime() < 1000 * 60;
@@ -101,6 +102,14 @@ export default function PropertyCard({ property, onToggleFavorite, favoritePendi
           )}
         </div>
       </Link>
+      <div className="flex gap-2 px-4 pb-4">
+        <Link to={`/property/${property.slug}`} className="flex-1 rounded-full border border-line py-2 text-center text-xs font-semibold text-ink">View details</Link>
+        {onChat && (
+          <button type="button" onClick={() => onChat(property)} className="flex items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-white">
+            <MessageCircle size={13} /> Chat
+          </button>
+        )}
+      </div>
     </div>
   );
 }

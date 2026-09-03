@@ -62,7 +62,22 @@ export interface Property {
   isFavorited: boolean;
   createdAt: string;
   updatedAt: string;
+  listingType?: "LOOKING_FOR_FLATMATE" | "OFFERING_FLAT" | "LOOKING_FOR_FLAT" | null;
+  roomType?: string | null;
+  existingFlatmates?: number | null;
+  preferredGender?: string | null;
+  preferredAgeRange?: string | null;
+  occupation?: string | null;
+  foodPreference?: string | null;
+  smokingPreference?: string | null;
+  drinkingPreference?: string | null;
+  petsPreference?: string | null;
+  contactPreference?: string | null;
 }
+
+export interface ChatUser { id: string; name: string; profilePhotoUrl?: string | null }
+export interface ChatMessage { id: string; body: string; status: "SENT" | "DELIVERED" | "READ"; senderId: string; createdAt: string; sender: ChatUser }
+export interface Conversation { id: string; propertyId: string; listing: { id: string; slug: string; title: string; monthlyRent: number }; starter: ChatUser; recipient: ChatUser; messages: ChatMessage[] }
 
 export interface Pagination {
   page: number;

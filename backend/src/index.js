@@ -10,6 +10,7 @@ const enquiryRoutes = require("./routes/enquiries");
 const visitRoutes = require("./routes/visits");
 const locationRoutes = require("./routes/locations");
 const adminRoutes = require("./routes/admin");
+const chatRoutes = require("./routes/chats");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
@@ -44,6 +45,7 @@ app.use("/api/enquiries", enquiryRoutes);
 app.use("/api/visits", visitRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/chats", chatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
