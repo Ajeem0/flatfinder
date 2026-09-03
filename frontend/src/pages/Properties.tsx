@@ -85,9 +85,9 @@ export default function Properties() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, sort, page, q]);
 
-  // Debounced fetch so typing in the city/budget fields doesn't spam the API
+  // Debounced fetch so typing in the city/budget fields doesn't spam the API.
   useEffect(() => {
-    const handle = setTimeout(fetchResults, 350);
+    const handle = setTimeout(fetchResults, 150);
     return () => clearTimeout(handle);
   }, [fetchResults]);
 

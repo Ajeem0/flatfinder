@@ -22,6 +22,12 @@ const propertyInclude = {
   location: { include: { city: true } },
 };
 
+const propertyListInclude = {
+  images: { orderBy: { sortOrder: "asc" }, take: 1 },
+  owner: { select: { id: true, name: true, userType: true, profilePhotoUrl: true, isPhoneVerified: true } },
+  location: { include: { city: true } },
+};
+
 function serializeProperty(p, favoritedIds = new Set()) {
   return {
     id: p.id,
@@ -54,7 +60,7 @@ function serializeProperty(p, favoritedIds = new Set()) {
     locationName: p.location?.name || null,
     videoUrl: p.videoUrl || null,
     images: p.images.map((i) => i.url),
-    amenities: p.amenities.map((a) => a.amenity.name),
+    amenities: (p.amenities || []).map((a) => a.amenity.name),
     owner: p.owner
       ? {
           id: p.owner.id,
@@ -176,7 +182,7 @@ router.get("/", optionalAuth, async (req, res, next) => {
 
     const [total, properties] = await Promise.all([
       prisma.property.count({ where }),
-      prisma.property.findMany({ where, include: propertyInclude, orderBy, take, skip }),
+      prisma.property.findMany({ where, include: propertyListInclude, orderBy, take, skip }),
     ]);
 
     let favoritedIds = new Set();
