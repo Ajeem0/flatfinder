@@ -1,4 +1,4 @@
-import { Heart, MapPin, BedDouble, Ruler, BadgeCheck, MessageCircle } from "lucide-react";
+import { Heart, MapPin, BedDouble, Ruler, BadgeCheck, MessageCircle, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Property } from "../types";
 import { formatDate, formatRent, FURNISHING_LABEL } from "../lib/format";
@@ -9,16 +9,18 @@ interface Props {
   favoritePending?: boolean;
   revealDelay?: number;
   onChat?: (property: Property) => void;
+  onSelect?: (property: Property) => void;
+  selected?: boolean;
 }
 
-export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat }: Props) {
+export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat, onSelect, selected = false }: Props) {
   const cover = property.images[0];
   const isRecentlyApproved =
     property.status === "PUBLISHED" && Date.now() - new Date(property.updatedAt).getTime() < 1000 * 60;
 
   return (
     <div
-      className="card-lift group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-sm"
+      className={`card-lift group relative flex flex-col overflow-hidden rounded-2xl border bg-surface shadow-sm ${selected ? "border-primary ring-2 ring-primary/15" : "border-line"}`}
       data-reveal
       data-delay={revealDelay}
     >
@@ -104,6 +106,17 @@ export default function PropertyCard({ property, onToggleFavorite, favoritePendi
       </Link>
       <div className="flex gap-2 px-4 pb-4">
         <Link to={`/property/${property.slug}`} className="flex-1 rounded-full border border-line py-2 text-center text-xs font-semibold text-ink">View details</Link>
+        {onSelect && (
+          <button
+            type="button"
+            onClick={() => onSelect(property)}
+            aria-pressed={selected}
+            className={`flex items-center justify-center gap-1 rounded-full px-3 py-2 text-xs font-semibold ${selected ? "bg-primary-soft text-primary" : "bg-primary text-white"}`}
+          >
+            {selected && <Check size={13} />}
+            {selected ? "Selected" : "Select property"}
+          </button>
+        )}
         {onChat && (
           <button type="button" onClick={() => onChat(property)} className="flex items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-white">
             <MessageCircle size={13} /> Chat
