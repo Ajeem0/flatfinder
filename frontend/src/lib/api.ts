@@ -121,6 +121,8 @@ export const api = {
     }> }>("/admin/users"),
     updateUserPhone: (id: string, phone: string) =>
       request<{ user: { id: string; phone: string | null } }>(`/admin/users/${id}/phone`, { method: "PUT", body: JSON.stringify({ phone }) }),
+    verifyOwner: (id: string) =>
+      request<{ user: { id: string; isPhoneVerified: boolean } }>(`/admin/users/${id}/verify`, { method: "POST" }),
     pendingProperties: () => request<{ results: Property[] }>("/admin/properties/pending"),
     allProperties: () => request<{ results: Property[] }>("/admin/properties/all"),
     approveProperty: (id: string) => request<{ property: Property }>(`/admin/properties/${id}/approve`, { method: "POST" }),
