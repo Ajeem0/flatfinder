@@ -71,7 +71,7 @@ function AppShell() {
               </ProtectedRoute>
             }
           />
-          <Route path="/post-property" element={<PostProperty />} />
+          <Route path="/post-property" element={<ProtectedRoute roles={["OWNER", "AGENT", "ADMIN"]}><PostProperty /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

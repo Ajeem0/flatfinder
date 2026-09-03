@@ -17,6 +17,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const isAdmin = user?.userType === "ADMIN";
+  const canPostProperty = !user || user.userType !== "TENANT";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -39,7 +40,7 @@ export default function Navbar() {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-6">
-            {navLinks.map((l) => (
+            {navLinks.filter((link) => canPostProperty || link.to !== "/post-property").map((l) => (
               <NavLink
                 key={l.label}
                 to={l.to}
@@ -106,7 +107,7 @@ export default function Navbar() {
 
         {open && (
           <div className="lg:hidden border-t border-line bg-surface px-4 py-3 flex flex-col gap-3 shadow-[0_12px_20px_rgba(20,22,43,0.05)]">
-            {navLinks.map((l) => (
+            {navLinks.filter((link) => canPostProperty || link.to !== "/post-property").map((l) => (
               <Link key={l.label} to={l.to} onClick={() => setOpen(false)} className="text-sm font-medium text-ink py-1.5">
                 {l.label}
               </Link>
@@ -151,7 +152,7 @@ export default function Navbar() {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-line bg-surface/95 backdrop-blur py-2 px-2 shadow-[0_-10px_20px_rgba(20,22,43,0.04)]">
         <MobileTab to="/" icon={<Home size={20} />} label="Home" />
         <MobileTab to="/properties" icon={<Search size={20} />} label="Search" />
-        <MobileTab to="/post-property" icon={<PlusCircle size={20} />} label="Post" />
+        {canPostProperty && <MobileTab to="/post-property" icon={<PlusCircle size={20} />} label="Post" />}
         <MobileTab to="/favorites" icon={<Heart size={20} />} label="Saved" />
         <MobileTab to={user ? "/dashboard" : "/login"} icon={<UserIcon size={20} />} label={user ? "You" : "Login"} />
       </nav>
