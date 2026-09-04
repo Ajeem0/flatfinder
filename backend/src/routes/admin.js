@@ -4,6 +4,32 @@ const { requireAuth, requireUserType } = require("../middleware/auth");
 
 const router = express.Router();
 
+const adminPropertyListSelect = {
+  id: true,
+  title: true,
+  description: true,
+  status: true,
+  latitude: true,
+  longitude: true,
+  createdAt: true,
+  updatedAt: true,
+  location: {
+    select: {
+      name: true,
+      city: { select: { name: true } },
+    },
+  },
+};
+
+function formatAdminProperty(property) {
+  return {
+    ...property,
+    city: property.location?.city?.name || null,
+    locationName: property.location?.name || null,
+    location: undefined,
+  };
+}
+
 // GET /api/admin/users -- all users, excluding authentication secrets
 router.get("/users", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
   try {
@@ -72,15 +98,10 @@ router.get("/properties/pending", requireAuth, requireUserType("ADMIN"), async (
   try {
     const properties = await prisma.property.findMany({
       where: { status: "PENDING" },
-      include: {
-        images: { orderBy: { sortOrder: "asc" } },
-        amenities: { include: { amenity: true } },
-        owner: { select: { id: true, name: true, email: true, phone: true } },
-        location: { include: { city: true } },
-      },
+      select: adminPropertyListSelect,
       orderBy: { createdAt: "desc" },
     });
-    res.json({ results: properties });
+    res.json({ results: properties.map(formatAdminProperty) });
   } catch (err) {
     next(err);
   }
@@ -90,15 +111,10 @@ router.get("/properties/pending", requireAuth, requireUserType("ADMIN"), async (
 router.get("/properties/all", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
   try {
     const properties = await prisma.property.findMany({
-      include: {
-        images: { orderBy: { sortOrder: "asc" } },
-        amenities: { include: { amenity: true } },
-        owner: { select: { id: true, name: true, email: true, phone: true } },
-        location: { include: { city: true } },
-      },
+      select: adminPropertyListSelect,
       orderBy: { createdAt: "desc" },
     });
-    res.json({ results: properties });
+    res.json({ results: properties.map(formatAdminProperty) });
   } catch (err) {
     next(err);
   }
