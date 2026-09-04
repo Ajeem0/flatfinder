@@ -20,7 +20,9 @@ function isAllowedLocalOrigin(origin) {
 }
 
 const allowedOrigins = new Set(
-  [process.env.CORS_ORIGIN, "http://localhost:5173", "https://flatfinder-beta.vercel.app/"].filter(Boolean)
+  [process.env.CORS_ORIGIN, "http://localhost:5173", "https://flatfinder-beta.vercel.app"]
+    .filter(Boolean)
+    .map((origin) => origin.replace(/\/$/, ""))
 );
 
 app.use(
@@ -33,7 +35,7 @@ app.use(
     },
   })
 );
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "20mb" }));
 app.use(morgan("dev"));
 
 app.get("/api/health", (req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));

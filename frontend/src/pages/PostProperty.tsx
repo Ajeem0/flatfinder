@@ -8,6 +8,8 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../context/AuthContext";
 
 const STEPS = ["Type", "Location", "Details", "Pricing", "Amenities", "Photos", "Description", "Preview"];
+const MAX_VIDEO_BYTES = 8 * 1024 * 1024;
+const MAX_MEDIA_DATA_URL_BYTES = 14 * 1024 * 1024;
 export const AMENITY_LIST = ["Parking", "Lift", "Wi-Fi", "AC", "Power Backup", "Security", "Gym", "Swimming Pool", "Balcony", "Water Supply", "Attached Bathroom"];
 
 interface FormState {
@@ -113,26 +115,48 @@ function PostPropertyForm() {
     setStep((s) => Math.max(0, s - 1));
   }
 
+  function mediaSize(images: string[], videoUrl: string) {
+    return [...images, videoUrl].reduce((total, value) => total + value.length, 0);
+  }
+
+  function readImageAsDataUrl(file: File) {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.onload = () => {
+          const maxDimension = 1600;
+          const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.82));
+        };
+        image.onerror = () => reject(new Error("Unable to process selected image"));
+        image.src = String(reader.result);
+      };
+      reader.onerror = () => reject(new Error("Unable to read selected image"));
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
     try {
       const uploaded = await Promise.all(
-        files.map(
-          (file) =>
-            new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(String(reader.result));
-              reader.onerror = () => reject(new Error("Unable to read selected image"));
-              reader.readAsDataURL(file);
-            })
-        )
+        files.map((file) => readImageAsDataUrl(file))
       );
 
-      update({ images: [...form.images, ...uploaded] });
+      const images = [...form.images, ...uploaded];
+      if (mediaSize(images, form.videoUrl) > MAX_MEDIA_DATA_URL_BYTES) {
+        throw new Error("The selected media is too large");
+      }
+      update({ images });
     } catch {
-      setError("One or more images could not be uploaded. Please try again.");
+      setError("These photos are too large together. Choose fewer photos or smaller files.");
     } finally {
       event.target.value = "";
     }
@@ -142,6 +166,12 @@ function PostPropertyForm() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (file.size > MAX_VIDEO_BYTES) {
+      setError("Video must be 8 MB or smaller.");
+      event.target.value = "";
+      return;
+    }
+
     try {
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -150,10 +180,13 @@ function PostPropertyForm() {
         reader.readAsDataURL(file);
       });
 
+      if (mediaSize(form.images, dataUrl) > MAX_MEDIA_DATA_URL_BYTES) {
+        throw new Error("The selected media is too large");
+      }
       update({ videoUrl: dataUrl });
       setError(null);
     } catch {
-      setError("The selected video could not be uploaded. Please try again.");
+      setError("This video is too large together with the photos. Choose fewer photos or a smaller video.");
     } finally {
       event.target.value = "";
     }

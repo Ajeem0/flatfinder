@@ -14,6 +14,9 @@ function errorHandler(err, req, res, next) {
   if (err.code === "P2025") {
     return res.status(404).json({ error: "Record not found" });
   }
+  if (err.type === "entity.too.large" || err.status === 413) {
+    return res.status(413).json({ error: "Listing media is too large. Please choose fewer or smaller files." });
+  }
 
   const status = err.status || 500;
   res.status(status).json({ error: err.message || "Internal server error" });

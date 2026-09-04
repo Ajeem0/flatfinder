@@ -4,20 +4,24 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import type { Property } from "../types";
 import { useToast } from "../context/ToastContext";
+import { ErrorState } from "../components/States";
 
 export default function AdminListings() {
   const [listings, setListings] = useState<Property[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { notify } = useToast();
   const view = searchParams.get("view") === "all" ? "all" : "pending";
   const [users, setUsers] = useState<Awaited<ReturnType<typeof api.admin.users>>["results"] | null>(null);
 
   async function load() {
+    setLoadError(null);
+    setListings(null);
     try {
       const res = view === "all" ? await api.admin.allProperties() : await api.admin.pendingProperties();
       setListings(res.results);
     } catch (err) {
-      setListings([]);
+      setLoadError(err instanceof Error ? err.message : "Could not load properties");
     }
   }
 
@@ -137,7 +141,9 @@ export default function AdminListings() {
           </div>
         )
       ) : (
-        listings === null ? (
+        loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
+        ) : listings === null ? (
         <p>Loading...</p>
       ) : listings.length === 0 ? (
         <p>{view === "all" ? "No properties found" : "No pending listings"}</p>
