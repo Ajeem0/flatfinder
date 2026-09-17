@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Heart, MapPin, BedDouble, Ruler, Layers, Calendar, BadgeCheck, Phone,
-  MessageCircle, CalendarPlus, ChevronLeft, ChevronRight, X,
+  MessageCircle, CalendarPlus, ChevronLeft, ChevronRight, X, ParkingSquare,
+  Building, Wifi, Snowflake, BatteryCharging, ShieldCheck, Dumbbell, Waves,
+  SunMedium, Droplets, ShowerHead, Check,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { api, ApiError } from "../lib/api";
 import type { Property } from "../types";
 import { bhkLabel, formatDate, formatRent, FURNISHING_LABEL, PROPERTY_TYPE_LABEL } from "../lib/format";
@@ -11,10 +14,18 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { ErrorState } from "../components/States";
 
-const AMENITY_ICONS: Record<string, string> = {
-  Parking: "🅿️", Lift: "🛗", "Wi-Fi": "📶", AC: "❄️", "Power Backup": "🔋",
-  Security: "🛡️", Gym: "🏋️", "Swimming Pool": "🏊", Balcony: "🌇",
-  "Water Supply": "🚰", "Attached Bathroom": "🚿",
+const AMENITY_ICONS: Record<string, LucideIcon> = {
+  Parking: ParkingSquare,
+  Lift: Building,
+  "Wi-Fi": Wifi,
+  AC: Snowflake,
+  "Power Backup": BatteryCharging,
+  Security: ShieldCheck,
+  Gym: Dumbbell,
+  "Swimming Pool": Waves,
+  Balcony: SunMedium,
+  "Water Supply": Droplets,
+  "Attached Bathroom": ShowerHead,
 };
 
 export default function PropertyDetail() {
@@ -289,7 +300,11 @@ export default function PropertyDetail() {
               {property.amenities.length === 0 && <p className="text-sm text-ink-soft col-span-full">No amenities listed.</p>}
               {property.amenities.map((a) => (
                 <div key={a} className="flex items-center gap-2 rounded-xl border border-line px-3 py-2.5 text-sm text-ink">
-                  <span aria-hidden>{AMENITY_ICONS[a] || "✓"}</span> {a}
+                  {(() => {
+                    const AmenityIcon = AMENITY_ICONS[a] || Check;
+                    return <AmenityIcon size={17} strokeWidth={1.8} className="shrink-0 text-primary" aria-hidden="true" />;
+                  })()}
+                  {a}
                 </div>
               ))}
             </div>
