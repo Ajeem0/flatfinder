@@ -30,6 +30,7 @@ export default function PropertyDetail() {
   const [visitOpen, setVisitOpen] = useState(false);
   const [visitDate, setVisitDate] = useState("");
   const galleryStripRef = useRef<HTMLDivElement>(null);
+  const fullscreenTouchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -59,12 +60,6 @@ export default function PropertyDetail() {
       window.removeEventListener("keydown", handleGalleryKeyDown);
     };
   }, [galleryOpen, property?.images.length]);
-
-  useEffect(() => {
-    const strip = galleryStripRef.current;
-    if (!strip || !property?.images.length) return;
-    strip.scrollTo({ left: strip.clientWidth * activeImage, behavior: "smooth" });
-  }, [activeImage, property]);
 
   async function toggleFavorite() {
     if (!property) return;
@@ -138,7 +133,12 @@ export default function PropertyDetail() {
   const videoEmbedUrl = getVideoEmbedUrl(property.videoUrl);
 
   function selectImage(index: number) {
-    setActiveImage(Math.max(0, Math.min(images.length - 1, index)));
+    const nextIndex = Math.max(0, Math.min(images.length - 1, index));
+    setActiveImage(nextIndex);
+    galleryStripRef.current?.scrollTo({
+      left: galleryStripRef.current.clientWidth * nextIndex,
+      behavior: "smooth",
+    });
   }
 
   function showPreviousImage() {
@@ -159,7 +159,7 @@ export default function PropertyDetail() {
             className="flex snap-x snap-mandatory touch-pan-x select-none overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onScroll={(event) => {
               const slideWidth = event.currentTarget.clientWidth;
-              if (slideWidth) selectImage(Math.round(event.currentTarget.scrollLeft / slideWidth));
+              if (slideWidth) setActiveImage(Math.round(event.currentTarget.scrollLeft / slideWidth));
             }}
           >
             {images.map((image, index) => (
@@ -390,8 +390,19 @@ export default function PropertyDetail() {
               <X size={24} />
             </button>
           </div>
-          <div className="relative flex min-h-0 flex-1 items-center justify-center py-3 sm:py-6">
-            <img src={images[activeImage]} alt={`${property.title} photo ${activeImage + 1}`} className="max-h-full max-w-full rounded-lg object-contain" />
+          <div
+            className="relative min-h-0 flex-1 touch-pan-x overflow-hidden py-3 sm:py-6"
+            onTouchStart={(event) => { fullscreenTouchStartX.current = event.touches[0]?.clientX ?? null; }}
+            onTouchEnd={(event) => {
+              const startX = fullscreenTouchStartX.current;
+              const endX = event.changedTouches[0]?.clientX;
+              fullscreenTouchStartX.current = null;
+              if (startX === null || endX === undefined || Math.abs(endX - startX) < 45) return;
+              if (endX < startX) showNextImage();
+              else showPreviousImage();
+            }}
+          >
+            <img src={images[activeImage]} alt={`${property.title} photo ${activeImage + 1}`} className="h-full w-full rounded-lg object-contain" />
             {images.length > 1 && (
               <>
                 <button type="button" onClick={showPreviousImage} aria-label="Previous property photo" className="absolute left-0 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur sm:left-4">
