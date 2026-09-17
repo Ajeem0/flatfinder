@@ -34,8 +34,6 @@ export default function PropertyDetail() {
   const galleryPointerStartX = useRef<number | null>(null);
   const galleryPointerStartScrollLeft = useRef(0);
   const galleryPointerDragging = useRef(false);
-  const suppressGalleryClick = useRef(false);
-  const lastGalleryTrigger = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -71,7 +69,6 @@ export default function PropertyDetail() {
       if (window.history.state?.propertyGallery) window.history.back();
       window.removeEventListener("keydown", handleGalleryKeyDown);
       window.removeEventListener("popstate", handleBrowserBack);
-      window.setTimeout(() => lastGalleryTrigger.current?.focus(), 0);
     };
   }, [galleryOpen, property?.images.length]);
 
@@ -155,12 +152,6 @@ export default function PropertyDetail() {
     });
   }
 
-  function openGallery(index: number, trigger?: HTMLButtonElement) {
-    lastGalleryTrigger.current = trigger ?? null;
-    selectImage(index);
-    setGalleryOpen(true);
-  }
-
   function handleGalleryPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType !== "mouse") return;
     galleryPointerStartX.current = event.clientX;
@@ -182,7 +173,6 @@ export default function PropertyDetail() {
 
   function handleGalleryPointerUp(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType !== "mouse") return;
-    suppressGalleryClick.current = galleryPointerDragging.current;
     galleryPointerStartX.current = null;
     galleryPointerDragging.current = false;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
@@ -214,22 +204,12 @@ export default function PropertyDetail() {
             }}
           >
             {images.map((image, index) => (
-              <button
+              <div
                 key={`${image}-${index}`}
-                type="button"
-                onClick={(event) => {
-                  if (suppressGalleryClick.current) {
-                    suppressGalleryClick.current = false;
-                    event.preventDefault();
-                    return;
-                  }
-                  openGallery(index, event.currentTarget);
-                }}
                 className="relative min-w-full snap-center shrink-0 bg-ink"
-                aria-label={`Open property photo ${index + 1} of ${images.length}`}
               >
                 <img src={image} alt={`${property.title} photo ${index + 1}`} loading={index < 2 ? "eager" : "lazy"} className="h-full w-full object-contain" />
-              </button>
+              </div>
             ))}
           </div>
         ) : (
