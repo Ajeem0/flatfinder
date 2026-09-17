@@ -12,6 +12,11 @@ import type {
 
 const BASE_URL = import.meta.env.API_URL || "https://flatfinder-1.onrender.com/api";
 const TOKEN_KEY = "flatfinder_token";
+const PROPERTY_SEARCH_CACHE_PREFIX = "flatfinder:property-search:";
+const PROPERTY_SEARCH_CACHE_TTL = 60_000;
+
+type CachedPropertySearch = { data: PropertySearchResponse; cachedAt: number };
+const propertySearchCache = new Map<string, CachedPropertySearch>();
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -58,6 +63,45 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data as T;
 }
 
+async function cachedPropertySearch(params: URLSearchParams, cacheKey: string) {
+  const key = `${cacheKey}?${params.toString()}`;
+  const now = Date.now();
+  const memoryValue = propertySearchCache.get(key);
+  if (memoryValue && now - memoryValue.cachedAt < PROPERTY_SEARCH_CACHE_TTL) return memoryValue.data;
+
+  try {
+    const stored = sessionStorage.getItem(`${PROPERTY_SEARCH_CACHE_PREFIX}${key}`);
+    if (stored) {
+      const value = JSON.parse(stored) as CachedPropertySearch;
+      if (now - value.cachedAt < PROPERTY_SEARCH_CACHE_TTL) {
+        propertySearchCache.set(key, value);
+        return value.data;
+      }
+      sessionStorage.removeItem(`${PROPERTY_SEARCH_CACHE_PREFIX}${key}`);
+    }
+  } catch {
+  }
+
+  const data = await request<PropertySearchResponse>(`/properties?${params.toString()}`);
+  const value = { data, cachedAt: now };
+  propertySearchCache.set(key, value);
+  try {
+    sessionStorage.setItem(`${PROPERTY_SEARCH_CACHE_PREFIX}${key}`, JSON.stringify(value));
+  } catch {
+  }
+  return data;
+}
+
+export function clearPropertySearchCache() {
+  propertySearchCache.clear();
+  try {
+    Object.keys(sessionStorage)
+      .filter((key) => key.startsWith(PROPERTY_SEARCH_CACHE_PREFIX))
+      .forEach((key) => sessionStorage.removeItem(key));
+  } catch {
+  }
+}
+
 export const api = {
   auth: {
     register: (payload: { name: string; email: string; phone?: string; password: string; userType: string }) =>
@@ -73,7 +117,10 @@ export const api = {
       request<{ message: string }>("/auth/admin/password", { method: "PUT", body: JSON.stringify(payload) }),
   },
   properties: {
-    search: (params: URLSearchParams) => request<PropertySearchResponse>(`/properties?${params.toString()}`),
+    search: (params: URLSearchParams, cacheKey?: string) =>
+      cacheKey
+        ? cachedPropertySearch(params, cacheKey)
+        : request<PropertySearchResponse>(`/properties?${params.toString()}`),
     get: (idOrSlug: string) => request<{ property: Property }>(`/properties/${idOrSlug}`),
     create: (payload: Record<string, unknown>) =>
       request<{ property: Property }>("/properties", { method: "POST", body: JSON.stringify(payload) }),

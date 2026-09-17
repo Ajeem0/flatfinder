@@ -4,7 +4,7 @@ import { SlidersHorizontal, LayoutGrid, List, X } from "lucide-react";
 import PropertyCard from "../components/PropertyCard";
 import FilterSidebar, { ActiveFilterPills, EMPTY_FILTERS, type FilterState } from "../components/FilterSidebar";
 import { CardSkeletonGrid, EmptyState, ErrorState } from "../components/States";
-import { api, ApiError } from "../lib/api";
+import { api, ApiError, clearPropertySearchCache } from "../lib/api";
 import type { Property } from "../types";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -48,7 +48,7 @@ function buildParams(filters: FilterState, sort: string, page: number, q: string
   );
   params.set("sort", sort);
   params.set("page", String(page));
-  params.set("pageSize", "12");
+  params.set("pageSize", "9");
   return params;
 }
 
@@ -77,7 +77,7 @@ export default function Properties() {
     setError(null);
     try {
       const params = buildParams(filters, sort, page, q);
-      const res = await api.properties.search(params);
+      const res = await api.properties.search(params, `properties:${user?.id || "guest"}`);
       setResults(res.results);
       setTotal(res.pagination.total);
       setTotalPages(res.pagination.totalPages || 1);
@@ -117,6 +117,7 @@ export default function Properties() {
     }
     try {
       const { favorited } = await api.properties.toggleFavorite(id);
+      clearPropertySearchCache();
       setResults((prev) => prev?.map((p) => (p.id === id ? { ...p, isFavorited: favorited } : p)) ?? prev);
       notify(favorited ? "Saved to favorites" : "Removed from favorites", "success");
     } catch {
