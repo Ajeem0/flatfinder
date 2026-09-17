@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Home as HomeIcon } from "lucide-react";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import Layout from "./components/Layout";
@@ -25,7 +26,7 @@ function AppShell() {
   const [isBooting, setIsBooting] = useState(true);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setIsBooting(false), 450);
+    const timer = window.setTimeout(() => setIsBooting(false), 3000);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -33,8 +34,11 @@ function AppShell() {
     <>
       <div className={`app-splash ${isBooting ? "is-visible" : "is-hidden"}`} aria-hidden={!isBooting}>
         <div className="app-splash__logo">
-          <span>F</span>
+          <HomeIcon size={34} strokeWidth={1.8} />
+          <span className="app-splash__window app-splash__window--one" />
+          <span className="app-splash__window app-splash__window--two" />
         </div>
+        <p className="app-splash__label">Finding your place</p>
       </div>
 
       <Layout>

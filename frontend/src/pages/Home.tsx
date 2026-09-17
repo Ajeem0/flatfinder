@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, Search, Users, ArrowRight } from "lucide-react";
+import { ArrowRight, BadgeCheck, Sparkles } from "lucide-react";
 import SearchBar from "../components/SearchBar";
 import PropertyCard from "../components/PropertyCard";
 import { CardSkeletonGrid } from "../components/States";
@@ -18,13 +18,13 @@ export default function Home() {
   const { notify } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const params = new URLSearchParams({ sort: "newest", pageSize: "3" });
-    api.properties
-      .search(params)
-      .then((res) => setFeatured(res.results))
-      .catch(() => setFeatured([]));
-  }, []);
+    useEffect(() => {
+      const params = new URLSearchParams({ sort: "newest", pageSize: "6" });
+      api.properties
+        .search(params)
+        .then((res) => setFeatured(res.results))
+        .catch(() => setFeatured([]));
+    }, []);
 
   async function toggleFavorite(id: string) {
     if (!user) {
@@ -49,75 +49,83 @@ export default function Home() {
   }
 
   return (
-    <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-primary">
+    <div className="overflow-hidden">
+      <section
+        className="relative isolate min-h-[540px] bg-ink bg-cover bg-center sm:min-h-[610px]"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2200&q=85')",
+        }}
+      >
         <div
-          className="absolute inset-0 opacity-25 hero-card"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1800&q=60')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
+          className="absolute inset-0 -z-10 bg-ink/65"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/95 via-primary/85 to-primary" />
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-ink/50 to-transparent" />
 
-        <div className="relative mx-auto max-w-7xl px-3 pt-12 pb-20 sm:px-6 sm:pt-24 sm:pb-36 text-center">
-          <span className="hero-badge inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium text-white/90 mb-4 sm:text-xs sm:mb-5">
-            <ShieldCheck size={13} /> Verified owners across 7 cities
+        <div className="mx-auto flex min-h-[540px] max-w-7xl flex-col justify-center px-4 pb-20 pt-20 sm:min-h-[610px] sm:px-6 sm:pb-28 sm:pt-24">
+          <div className="max-w-2xl text-white">
+            <span className="hero-badge inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
+              <BadgeCheck size={14} /> Homes checked for you
           </span>
-          <h1 className="hero-title mx-auto max-w-3xl font-display text-3xl font-semibold leading-[1.08] text-white sm:text-6xl">
-            Find a place you'll love to live.
-          </h1>
-          <p className="hero-copy mx-auto mt-3 max-w-xl text-sm text-white/80 sm:mt-4 sm:text-lg">
-            Discover flats, apartments, PGs and rooms that match your budget, location and lifestyle.
-          </p>
-        </div>
-      </section>
-
-      {/* Floating search card, overlapping hero/content boundary */}
-      <div className="relative -mt-14 sm:-mt-24 mx-auto max-w-5xl px-3 sm:px-6">
-        <div className="hero-cta">
-          <SearchBar />
-        </div>
-
-        <div className="hero-cta mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:mt-5 sm:gap-2">
-          <span className="mr-1 text-[10px] font-medium text-ink-soft sm:text-xs">Popular:</span>
-          {POPULAR_CITIES.map((city) => (
-            <Link
-              key={city}
-              to={`/properties?city=${city}`}
-              className="rounded-full border border-line bg-white px-2.5 py-1.5 text-[10px] font-medium text-ink transition-colors hover:border-primary hover:text-primary sm:px-3 sm:text-xs"
-            >
-              {city}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Trust strip */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 mt-20 grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <TrustCard icon={<ShieldCheck size={20} />} title="Verified listings" desc="Every owner is phone-verified before their listing goes live." delay={0} />
-        <TrustCard icon={<Search size={20} />} title="Smart search" desc={`Type it like you'd say it — "2 BHK under 20k in Jaipur" just works.`} delay={120} />
-        <TrustCard icon={<Users size={20} />} title="No hidden brokerage" desc="Filter for owner-listed, no-brokerage properties in one tap." delay={240} />
-      </section>
-
-      {/* Featured properties */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 mt-20 mb-24">
-        <div className="flex items-end justify-between mb-6" data-reveal>
-          <div>
-            <h2 className="font-display text-2xl font-semibold text-ink">Freshly listed</h2>
-            <p className="text-sm text-ink-soft mt-1">The newest homes added to FlatFinder</p>
+            <h1 className="hero-title mt-5 max-w-xl font-display text-4xl font-semibold leading-[1.02] text-white sm:text-6xl">
+              A better place to live is closer than you think.
+            </h1>
+            <p className="hero-copy mt-4 max-w-lg text-sm leading-relaxed text-white/80 sm:text-lg">
+              Explore real flats, PGs and rooms with clear pricing, verified owners and spaces that feel like home.
+            </p>
+            <div className="hero-cta mt-7 flex flex-wrap items-center gap-3">
+              <button onClick={openAllProperties} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink shadow-lg transition-transform hover:-translate-y-0.5">
+                Explore homes <ArrowRight size={16} />
+              </button>
+              <Link to="/post-property" className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/20">
+                List your property
+              </Link>
+            </div>
           </div>
-          <button onClick={openAllProperties} className="hidden sm:flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-            View all <ArrowRight size={14} />
-          </button>
+          <div className="mt-auto hidden items-center gap-8 pt-10 text-white/85 sm:flex">
+            <HeroProof value="7" label="cities" />
+            <HeroProof value="100%" label="phone-verified owners" />
+            <HeroProof value="₹0" label="hidden brokerage" />
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 mx-auto -mt-16 max-w-5xl px-3 sm:-mt-20 sm:px-6">
+        <div className="hero-card rounded-3xl border border-line bg-white p-3 shadow-[0_24px_70px_rgba(20,22,43,0.16)] sm:p-5">
+          <div className="mb-3 flex items-center justify-between px-1">
+            <div>
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={13} /> Start with a search</p>
+              <p className="mt-1 hidden text-sm text-ink-soft sm:block">Tell us where and how you want to live.</p>
+            </div>
+            <Link to="/properties" className="text-xs font-semibold text-ink-soft hover:text-primary">Browse all</Link>
+          </div>
+          <SearchBar />
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {POPULAR_CITIES.map((city) => (
+              <Link key={city} to={`/properties?city=${city}`} className="shrink-0 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:border-primary hover:text-primary">
+              {city}
+              </Link>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-ink-soft">Ready to find your next place?</p>
+            <AllPropertiesAction showLoginPrompt={showLoginPrompt} onOpen={openAllProperties} />
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 sm:pt-20">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Fresh on FlatFinder</p>
+            <h2 className="mt-2 font-display text-3xl font-semibold text-ink sm:text-4xl">Homes worth a closer look.</h2>
+            <p className="mt-2 text-sm text-ink-soft">Newly listed spaces with the details you need to decide.</p>
+          </div>
+          <AllPropertiesAction showLoginPrompt={showLoginPrompt} onOpen={openAllProperties} />
         </div>
 
         {featured === null ? (
           <div data-reveal>
-            <CardSkeletonGrid count={3} />
+            <CardSkeletonGrid count={6} />
           </div>
         ) : featured.length === 0 ? (
           <p className="text-sm text-ink-soft" data-reveal>No listings yet — check back soon, or be the first to post one.</p>
@@ -129,48 +137,35 @@ export default function Home() {
           </div>
         )}
 
-        <button onClick={openAllProperties} className="sm:hidden mt-6 flex w-full items-center justify-center gap-1 text-sm font-medium text-primary" data-reveal>
-          View all properties <ArrowRight size={14} />
-        </button>
-      </section>
-
-      {showLoginPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4" role="presentation" onMouseDown={() => setShowLoginPrompt(false)}>
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="login-prompt-title"
-            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <h2 id="login-prompt-title" className="font-display text-xl font-semibold text-ink">Log in to view all properties</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-soft">Create an account or log in to explore every available home.</p>
-            <div className="mt-6 flex gap-3">
-              <button onClick={() => setShowLoginPrompt(false)} className="flex-1 rounded-full border border-line px-4 py-2.5 text-sm font-medium text-ink">
-                Cancel
-              </button>
-              <Link
-                to="/login"
-                state={{ from: { pathname: "/properties" } }}
-                className="flex-1 rounded-full bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white"
-                onClick={() => setShowLoginPrompt(false)}
-              >
-                Log in
-              </Link>
-            </div>
-          </div>
+        <div className="mt-10 flex justify-center sm:hidden">
+          <AllPropertiesAction showLoginPrompt={showLoginPrompt} onOpen={openAllProperties} />
         </div>
+      </section>
+    </div>
+  );
+}
+
+function AllPropertiesAction({ showLoginPrompt, onOpen }: { showLoginPrompt: boolean; onOpen: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <button onClick={onOpen} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-light">
+        See more properties <ArrowRight size={15} />
+      </button>
+      {showLoginPrompt && (
+        <Link to="/login" state={{ from: { pathname: "/properties" } }} className="inline-flex items-center gap-1.5 rounded-full border border-primary bg-primary-soft px-4 py-2.5 text-sm font-semibold text-primary">
+          Log in to continue
+        </Link>
       )}
     </div>
   );
 }
 
-function TrustCard({ icon, title, desc, delay }: { icon: React.ReactNode; title: string; desc: string; delay: number }) {
+function HeroProof({ value, label }: { value: string; label: string }) {
   return (
-    <div className="card-lift rounded-2xl border border-line bg-white p-5" data-reveal data-delay={delay}>
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary mb-3">{icon}</div>
-      <h3 className="font-semibold text-ink text-sm mb-1">{title}</h3>
-      <p className="text-sm text-ink-soft leading-relaxed">{desc}</p>
+    <div>
+      <p className="font-display text-2xl font-semibold text-white">{value}</p>
+      <p className="mt-0.5 text-xs text-white/65">{label}</p>
     </div>
   );
 }
+

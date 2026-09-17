@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Heart, MapPin, BedDouble, Ruler, Layers, Calendar, BadgeCheck, Phone,
-  MessageCircle, CalendarPlus, X,
+  MessageCircle, CalendarPlus, ChevronLeft, ChevronRight, X,
 } from "lucide-react";
 import { api, ApiError } from "../lib/api";
 import type { Property } from "../types";
@@ -29,6 +29,7 @@ export default function PropertyDetail() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [visitOpen, setVisitOpen] = useState(false);
   const [visitDate, setVisitDate] = useState("");
+  const galleryStripRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -39,6 +40,31 @@ export default function PropertyDetail() {
       .then((res) => setProperty(res.property))
       .catch((err) => setError(err instanceof ApiError ? err.message : "Couldn't load this property."));
   }, [slug]);
+
+  useEffect(() => {
+    if (!galleryOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleGalleryKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setGalleryOpen(false);
+      if (event.key === "ArrowLeft") setActiveImage((current) => Math.max(0, current - 1));
+      if (event.key === "ArrowRight") setActiveImage((current) => Math.min((property?.images.length ?? 1) - 1, current + 1));
+    }
+
+    window.addEventListener("keydown", handleGalleryKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleGalleryKeyDown);
+    };
+  }, [galleryOpen, property?.images.length]);
+
+  useEffect(() => {
+    const strip = galleryStripRef.current;
+    if (!strip || !property?.images.length) return;
+    strip.scrollTo({ left: strip.clientWidth * activeImage, behavior: "smooth" });
+  }, [activeImage, property]);
 
   async function toggleFavorite() {
     if (!property) return;
@@ -111,21 +137,75 @@ export default function PropertyDetail() {
   const images = property.images.length ? property.images : [];
   const videoEmbedUrl = getVideoEmbedUrl(property.videoUrl);
 
+  function selectImage(index: number) {
+    setActiveImage(Math.max(0, Math.min(images.length - 1, index)));
+  }
+
+  function showPreviousImage() {
+    selectImage(activeImage - 1 < 0 ? images.length - 1 : activeImage - 1);
+  }
+
+  function showNextImage() {
+    selectImage(activeImage + 1 >= images.length ? 0 : activeImage + 1);
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 pb-28 lg:pb-10">
       {/* Gallery */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-6 rounded-2xl overflow-hidden">
-        <button className="sm:col-span-3 aspect-[16/10] sm:aspect-auto" onClick={() => setGalleryOpen(true)}>
-          <img src={images[activeImage] || images[0]} alt={property.title} className="h-full w-full object-cover" />
-        </button>
-        <div className="hidden sm:grid grid-rows-3 gap-2">
-          {images.slice(1, 4).map((img, i) => (
-            <button key={i} onClick={() => { setActiveImage(i + 1); setGalleryOpen(true); }} className="overflow-hidden rounded-lg">
-              <img src={img} alt="" className="h-full w-full object-cover" />
+      <div className="relative mb-6 overflow-hidden rounded-2xl bg-ink shadow-sm">
+        {images.length ? (
+          <div
+            ref={galleryStripRef}
+            className="flex snap-x snap-mandatory touch-pan-x select-none overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            onScroll={(event) => {
+              const slideWidth = event.currentTarget.clientWidth;
+              if (slideWidth) selectImage(Math.round(event.currentTarget.scrollLeft / slideWidth));
+            }}
+          >
+            {images.map((image, index) => (
+              <button
+                key={`${image}-${index}`}
+                type="button"
+                onClick={() => { selectImage(index); setGalleryOpen(true); }}
+                className="relative min-w-full snap-center aspect-[4/3] shrink-0 sm:aspect-[16/9]"
+                aria-label={`Open property photo ${index + 1} of ${images.length}`}
+              >
+                <img src={image} alt={`${property.title} photo ${index + 1}`} className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex aspect-[4/3] items-center justify-center text-sm text-white/70 sm:aspect-[16/9]">No photos yet</div>
+        )}
+        {images.length > 1 && (
+          <>
+            <button type="button" onClick={showPreviousImage} aria-label="Previous property photo" className="absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur sm:flex">
+              <ChevronLeft size={20} />
+            </button>
+            <button type="button" onClick={showNextImage} aria-label="Next property photo" className="absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur sm:flex">
+              <ChevronRight size={20} />
+            </button>
+            <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+              {activeImage + 1} / {images.length}
+            </span>
+          </>
+        )}
+      </div>
+      {images.length > 1 && (
+        <div className="mb-6 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {images.map((image, index) => (
+            <button
+              key={`${image}-thumb-${index}`}
+              type="button"
+              onClick={() => selectImage(index)}
+              aria-label={`Select property photo ${index + 1}`}
+              className={`h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition-opacity sm:h-20 sm:w-28 ${index === activeImage ? "border-primary" : "border-transparent opacity-65 hover:opacity-100"}`}
+            >
+              <img src={image} alt="" className="h-full w-full object-cover" />
             </button>
           ))}
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10">
         <div>
@@ -303,17 +383,36 @@ export default function PropertyDetail() {
 
       {/* Fullscreen gallery */}
       {galleryOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/95 flex flex-col">
-          <button onClick={() => setGalleryOpen(false)} className="absolute right-4 top-4 text-white" aria-label="Close gallery">
-            <X size={26} />
-          </button>
-          <div className="flex-1 flex items-center justify-center p-6">
-            <img src={images[activeImage]} alt="" className="max-h-full max-w-full object-contain" />
+        <div className="fixed inset-0 z-[60] flex flex-col bg-black/95 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-[calc(0.75rem+env(safe-area-inset-top))] sm:p-6" role="dialog" aria-modal="true" aria-label="Property photo gallery">
+          <div className="flex min-h-11 items-center justify-between text-white">
+            <p className="text-sm font-medium">{activeImage + 1} / {images.length}</p>
+            <button onClick={() => setGalleryOpen(false)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white" aria-label="Close gallery">
+              <X size={24} />
+            </button>
           </div>
-          <div className="flex justify-center gap-2 pb-6 overflow-x-auto px-4">
-            {images.map((img, i) => (
-              <button key={i} onClick={() => setActiveImage(i)} className={`h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 ${i === activeImage ? "border-white" : "border-transparent opacity-60"}`}>
-                <img src={img} alt="" className="h-full w-full object-cover" />
+          <div className="relative flex min-h-0 flex-1 items-center justify-center py-3 sm:py-6">
+            <img src={images[activeImage]} alt={`${property.title} photo ${activeImage + 1}`} className="max-h-full max-w-full rounded-lg object-contain" />
+            {images.length > 1 && (
+              <>
+                <button type="button" onClick={showPreviousImage} aria-label="Previous property photo" className="absolute left-0 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur sm:left-4">
+                  <ChevronLeft size={26} />
+                </button>
+                <button type="button" onClick={showNextImage} aria-label="Next property photo" className="absolute right-0 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur sm:right-4">
+                  <ChevronRight size={26} />
+                </button>
+              </>
+            )}
+          </div>
+          <div className="flex snap-x touch-pan-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {images.map((image, index) => (
+              <button
+                key={`${image}-fullscreen-${index}`}
+                type="button"
+                onClick={() => selectImage(index)}
+                className={`h-16 w-24 shrink-0 snap-start overflow-hidden rounded-lg border-2 sm:h-20 sm:w-28 ${index === activeImage ? "border-white" : "border-transparent opacity-55"}`}
+                aria-label={`Select property photo ${index + 1}`}
+              >
+                <img src={image} alt="" className="h-full w-full object-cover" />
               </button>
             ))}
           </div>
