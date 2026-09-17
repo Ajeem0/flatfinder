@@ -156,7 +156,7 @@ export default function PropertyDetail() {
         {images.length ? (
           <div
             ref={galleryStripRef}
-            className="flex snap-x snap-mandatory touch-pan-x select-none overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex max-sm:min-h-[min(72vw,65dvh)] snap-x snap-mandatory touch-pan-x select-none overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onScroll={(event) => {
               const slideWidth = event.currentTarget.clientWidth;
               if (slideWidth) setActiveImage(Math.round(event.currentTarget.scrollLeft / slideWidth));
@@ -167,15 +167,15 @@ export default function PropertyDetail() {
                 key={`${image}-${index}`}
                 type="button"
                 onClick={() => { selectImage(index); setGalleryOpen(true); }}
-                className="relative min-w-full snap-center aspect-[4/3] shrink-0 sm:aspect-[16/9]"
+                className="relative min-w-full snap-center aspect-[4/3] shrink-0 bg-ink sm:aspect-[16/9]"
                 aria-label={`Open property photo ${index + 1} of ${images.length}`}
               >
-                <img src={image} alt={`${property.title} photo ${index + 1}`} className="h-full w-full object-cover" />
+                <img src={image} alt={`${property.title} photo ${index + 1}`} className="h-full w-full object-contain" />
               </button>
             ))}
           </div>
         ) : (
-          <div className="flex aspect-[4/3] items-center justify-center text-sm text-white/70 sm:aspect-[16/9]">No photos yet</div>
+          <div className="flex max-sm:min-h-[min(72vw,65dvh)] aspect-[4/3] items-center justify-center text-sm text-white/70 sm:aspect-[16/9]">No photos yet</div>
         )}
         {images.length > 1 && (
           <>
