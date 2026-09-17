@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Properties from "./pages/Properties";
 import PropertyDetail from "./pages/PropertyDetail";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import Signup from "./pages/Signup";
 import Favorites from "./pages/Favorites";
 import Dashboard from "./pages/Dashboard";
@@ -44,6 +45,7 @@ function AppShell() {
           <Route path="/pg" element={<PgFinder />} />
           <Route path="/flatmates" element={<Flatmates />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />

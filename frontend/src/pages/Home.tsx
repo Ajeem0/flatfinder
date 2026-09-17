@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, Search, Users, ArrowRight } from "lucide-react";
 import SearchBar from "../components/SearchBar";
 import PropertyCard from "../components/PropertyCard";
@@ -13,11 +13,13 @@ const POPULAR_CITIES = ["Jaipur", "Delhi", "Mumbai", "Bangalore", "Pune", "Hyder
 
 export default function Home() {
   const [featured, setFeatured] = useState<Property[] | null>(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const { user } = useAuth();
   const { notify } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const params = new URLSearchParams({ sort: "newest", pageSize: "6" });
+    const params = new URLSearchParams({ sort: "newest", pageSize: "3" });
     api.properties
       .search(params)
       .then((res) => setFeatured(res.results))
@@ -36,6 +38,14 @@ export default function Home() {
     } catch {
       notify("Couldn't update favorites right now.", "error");
     }
+  }
+
+  function openAllProperties() {
+    if (user) {
+      navigate("/properties");
+      return;
+    }
+    setShowLoginPrompt(true);
   }
 
   return (
@@ -100,14 +110,14 @@ export default function Home() {
             <h2 className="font-display text-2xl font-semibold text-ink">Freshly listed</h2>
             <p className="text-sm text-ink-soft mt-1">The newest homes added to FlatFinder</p>
           </div>
-          <Link to="/properties" className="hidden sm:flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+          <button onClick={openAllProperties} className="hidden sm:flex items-center gap-1 text-sm font-medium text-primary hover:underline">
             View all <ArrowRight size={14} />
-          </Link>
+          </button>
         </div>
 
         {featured === null ? (
           <div data-reveal>
-            <CardSkeletonGrid count={6} />
+            <CardSkeletonGrid count={3} />
           </div>
         ) : featured.length === 0 ? (
           <p className="text-sm text-ink-soft" data-reveal>No listings yet — check back soon, or be the first to post one.</p>
@@ -119,10 +129,38 @@ export default function Home() {
           </div>
         )}
 
-        <Link to="/properties" className="sm:hidden mt-6 flex items-center justify-center gap-1 text-sm font-medium text-primary" data-reveal>
+        <button onClick={openAllProperties} className="sm:hidden mt-6 flex w-full items-center justify-center gap-1 text-sm font-medium text-primary" data-reveal>
           View all properties <ArrowRight size={14} />
-        </Link>
+        </button>
       </section>
+
+      {showLoginPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4" role="presentation" onMouseDown={() => setShowLoginPrompt(false)}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="login-prompt-title"
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <h2 id="login-prompt-title" className="font-display text-xl font-semibold text-ink">Log in to view all properties</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink-soft">Create an account or log in to explore every available home.</p>
+            <div className="mt-6 flex gap-3">
+              <button onClick={() => setShowLoginPrompt(false)} className="flex-1 rounded-full border border-line px-4 py-2.5 text-sm font-medium text-ink">
+                Cancel
+              </button>
+              <Link
+                to="/login"
+                state={{ from: { pathname: "/properties" } }}
+                className="flex-1 rounded-full bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white"
+                onClick={() => setShowLoginPrompt(false)}
+              >
+                Log in
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
