@@ -193,7 +193,7 @@ export default function PropertyDetail() {
         {images.length ? (
           <div
             ref={galleryStripRef}
-            className="flex aspect-[4/3] snap-x snap-mandatory touch-pan-x select-none overflow-x-auto overscroll-x-contain scroll-smooth sm:aspect-[16/9] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex aspect-[4/3] w-full snap-x snap-mandatory touch-pan-x select-none overflow-x-auto overscroll-x-contain scroll-smooth sm:aspect-[16/9] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onPointerDown={handleGalleryPointerDown}
             onPointerMove={handleGalleryPointerMove}
             onPointerUp={handleGalleryPointerUp}
@@ -206,9 +206,9 @@ export default function PropertyDetail() {
             {images.map((image, index) => (
               <div
                 key={`${image}-${index}`}
-                className="relative min-w-full snap-center shrink-0 bg-ink"
+                className="relative min-w-full max-w-full snap-center shrink-0 bg-ink"
               >
-                <img src={image} alt={`${property.title} photo ${index + 1}`} loading={index < 2 ? "eager" : "lazy"} className="h-full w-full object-contain" />
+                <img src={image} alt={`${property.title} photo ${index + 1}`} loading={index < 2 ? "eager" : "lazy"} className="h-full w-full object-cover" />
               </div>
             ))}
           </div>
@@ -217,11 +217,11 @@ export default function PropertyDetail() {
         )}
         {images.length > 1 && (
           <>
-            <button type="button" onClick={showPreviousImage} aria-label="Previous property photo" className="absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur sm:flex">
-              <ChevronLeft size={20} />
+            <button type="button" onClick={showPreviousImage} aria-label="Previous property photo" className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white shadow-md backdrop-blur sm:left-3 sm:h-10 sm:w-10">
+              <ChevronLeft size={22} />
             </button>
-            <button type="button" onClick={showNextImage} aria-label="Next property photo" className="absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur sm:flex">
-              <ChevronRight size={20} />
+            <button type="button" onClick={showNextImage} aria-label="Next property photo" className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white shadow-md backdrop-blur sm:right-3 sm:h-10 sm:w-10">
+              <ChevronRight size={22} />
             </button>
             <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white backdrop-blur">
               {activeImage + 1} / {images.length}
