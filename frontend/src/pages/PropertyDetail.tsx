@@ -31,6 +31,11 @@ export default function PropertyDetail() {
   const [visitDate, setVisitDate] = useState("");
   const galleryStripRef = useRef<HTMLDivElement>(null);
   const fullscreenTouchStartX = useRef<number | null>(null);
+  const galleryPointerStartX = useRef<number | null>(null);
+  const galleryPointerStartScrollLeft = useRef(0);
+  const galleryPointerDragging = useRef(false);
+  const suppressGalleryClick = useRef(false);
+  const lastGalleryTrigger = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -47,6 +52,7 @@ export default function PropertyDetail() {
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    window.history.pushState({ ...(window.history.state || {}), propertyGallery: true }, "", window.location.href);
 
     function handleGalleryKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") setGalleryOpen(false);
@@ -54,10 +60,18 @@ export default function PropertyDetail() {
       if (event.key === "ArrowRight") setActiveImage((current) => Math.min((property?.images.length ?? 1) - 1, current + 1));
     }
 
+    function handleBrowserBack() {
+      setGalleryOpen(false);
+    }
+
     window.addEventListener("keydown", handleGalleryKeyDown);
+    window.addEventListener("popstate", handleBrowserBack);
     return () => {
       document.body.style.overflow = previousOverflow;
+      if (window.history.state?.propertyGallery) window.history.back();
       window.removeEventListener("keydown", handleGalleryKeyDown);
+      window.removeEventListener("popstate", handleBrowserBack);
+      window.setTimeout(() => lastGalleryTrigger.current?.focus(), 0);
     };
   }, [galleryOpen, property?.images.length]);
 
@@ -141,6 +155,39 @@ export default function PropertyDetail() {
     });
   }
 
+  function openGallery(index: number, trigger?: HTMLButtonElement) {
+    lastGalleryTrigger.current = trigger ?? null;
+    selectImage(index);
+    setGalleryOpen(true);
+  }
+
+  function handleGalleryPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse") return;
+    galleryPointerStartX.current = event.clientX;
+    galleryPointerStartScrollLeft.current = event.currentTarget.scrollLeft;
+    galleryPointerDragging.current = false;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handleGalleryPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    const startX = galleryPointerStartX.current;
+    if (startX === null || event.pointerType !== "mouse") return;
+    const distance = event.clientX - startX;
+    if (Math.abs(distance) > 5) {
+      galleryPointerDragging.current = true;
+      event.currentTarget.scrollLeft = galleryPointerStartScrollLeft.current - distance;
+      event.preventDefault();
+    }
+  }
+
+  function handleGalleryPointerUp(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse") return;
+    suppressGalleryClick.current = galleryPointerDragging.current;
+    galleryPointerStartX.current = null;
+    galleryPointerDragging.current = false;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+
   function showPreviousImage() {
     selectImage(activeImage - 1 < 0 ? images.length - 1 : activeImage - 1);
   }
@@ -156,7 +203,11 @@ export default function PropertyDetail() {
         {images.length ? (
           <div
             ref={galleryStripRef}
-            className="flex max-sm:min-h-[min(72vw,65dvh)] snap-x snap-mandatory touch-pan-x select-none overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex aspect-[4/3] snap-x snap-mandatory touch-pan-x select-none overflow-x-auto overscroll-x-contain scroll-smooth sm:aspect-[16/9] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            onPointerDown={handleGalleryPointerDown}
+            onPointerMove={handleGalleryPointerMove}
+            onPointerUp={handleGalleryPointerUp}
+            onPointerCancel={handleGalleryPointerUp}
             onScroll={(event) => {
               const slideWidth = event.currentTarget.clientWidth;
               if (slideWidth) setActiveImage(Math.round(event.currentTarget.scrollLeft / slideWidth));
@@ -166,11 +217,18 @@ export default function PropertyDetail() {
               <button
                 key={`${image}-${index}`}
                 type="button"
-                onClick={() => { selectImage(index); setGalleryOpen(true); }}
-                className="relative min-w-full snap-center aspect-[4/3] shrink-0 bg-ink sm:aspect-[16/9]"
+                onClick={(event) => {
+                  if (suppressGalleryClick.current) {
+                    suppressGalleryClick.current = false;
+                    event.preventDefault();
+                    return;
+                  }
+                  openGallery(index, event.currentTarget);
+                }}
+                className="relative min-w-full snap-center shrink-0 bg-ink"
                 aria-label={`Open property photo ${index + 1} of ${images.length}`}
               >
-                <img src={image} alt={`${property.title} photo ${index + 1}`} className="h-full w-full object-contain" />
+                <img src={image} alt={`${property.title} photo ${index + 1}`} loading={index < 2 ? "eager" : "lazy"} className="h-full w-full object-contain" />
               </button>
             ))}
           </div>
@@ -385,13 +443,13 @@ export default function PropertyDetail() {
       {galleryOpen && (
         <div className="fixed inset-0 z-[60] flex flex-col bg-black/95 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-[calc(0.75rem+env(safe-area-inset-top))] sm:p-6" role="dialog" aria-modal="true" aria-label="Property photo gallery">
           <div className="flex min-h-11 items-center justify-between text-white">
-            <p className="text-sm font-medium">{activeImage + 1} / {images.length}</p>
-            <button onClick={() => setGalleryOpen(false)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white" aria-label="Close gallery">
+            <p className="text-sm font-medium" aria-live="polite">{activeImage + 1} / {images.length}</p>
+            <button autoFocus onClick={() => setGalleryOpen(false)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white" aria-label="Close gallery">
               <X size={24} />
             </button>
           </div>
           <div
-            className="relative min-h-0 flex-1 touch-pan-x overflow-hidden py-3 sm:py-6"
+            className="relative flex min-h-0 flex-1 items-center justify-center touch-pan-x overflow-hidden py-3 sm:py-6"
             onTouchStart={(event) => { fullscreenTouchStartX.current = event.touches[0]?.clientX ?? null; }}
             onTouchEnd={(event) => {
               const startX = fullscreenTouchStartX.current;
@@ -423,7 +481,7 @@ export default function PropertyDetail() {
                 className={`h-16 w-24 shrink-0 snap-start overflow-hidden rounded-lg border-2 sm:h-20 sm:w-28 ${index === activeImage ? "border-white" : "border-transparent opacity-55"}`}
                 aria-label={`Select property photo ${index + 1}`}
               >
-                <img src={image} alt="" className="h-full w-full object-cover" />
+                <img src={image} alt="" loading="lazy" className="h-full w-full object-cover" />
               </button>
             ))}
           </div>
