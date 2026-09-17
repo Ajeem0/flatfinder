@@ -31,6 +31,9 @@ interface FormState {
   maintenance: string;
   brokerage: string;
   noBrokerage: boolean;
+  bachelorFriendly: boolean;
+  familyFriendly: boolean;
+  girlsFriendly: boolean;
   amenities: string[];
   images: string[];
   videoUrl: string;
@@ -68,6 +71,9 @@ const INITIAL: FormState = {
   maintenance: "",
   brokerage: "",
   noBrokerage: true,
+  bachelorFriendly: true,
+  familyFriendly: true,
+  girlsFriendly: true,
   amenities: [],
   images: [],
   videoUrl: "",
@@ -211,6 +217,9 @@ function PostPropertyForm() {
         maintenance: Number(form.maintenance) || 0,
         brokerage: Number(form.brokerage) || 0,
         noBrokerage: form.noBrokerage,
+        bachelorFriendly: form.bachelorFriendly,
+        familyFriendly: form.familyFriendly,
+        girlsFriendly: form.girlsFriendly,
         cityName: form.cityName,
         locationName: form.locationName,
         address: form.address,
@@ -326,6 +335,27 @@ function PostPropertyForm() {
               <SelectField label="Preferred gender" value={form.preferredGender} onChange={(v) => update({ preferredGender: v })} options={["Any", "Women", "Men", "Non-binary"]} />
               <SelectField label="Preferred age range" value={form.preferredAgeRange} onChange={(v) => update({ preferredAgeRange: v })} options={["Any", "18-24", "25-30", "30+"]} />
               <SelectField label="Occupation / student status" value={form.occupation} onChange={(v) => update({ occupation: v })} options={["Any", "Student", "Working professional", "Remote worker"]} />
+              <div className="sm:col-span-2 rounded-xl border border-line bg-soft p-4">
+                <p className="text-sm font-semibold text-ink">Who is this property for?</p>
+                <p className="mt-1 text-xs text-ink-soft">Select everyone who is allowed to rent or stay here.</p>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {([
+                    ["bachelorFriendly", "Bachelors"],
+                    ["familyFriendly", "Families"],
+                    ["girlsFriendly", "Girls / women"],
+                  ] as const).map(([field, label]) => (
+                    <label key={field} className="flex cursor-pointer items-center gap-2 rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink">
+                      <input
+                        type="checkbox"
+                        checked={form[field]}
+                        onChange={(event) => update({ [field]: event.target.checked })}
+                        className="h-4 w-4 accent-[var(--color-primary)]"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
           </StepBlock>
         )}

@@ -134,6 +134,7 @@ model Property {
   noBrokerage        Boolean              @default(false)
   bachelorFriendly   Boolean              @default(true)
   familyFriendly     Boolean              @default(true)
+  girlsFriendly      Boolean              @default(true)
   petFriendly        Boolean              @default(false)
   availableFrom      DateTime?
   status             ListingStatus        @default(PENDING)

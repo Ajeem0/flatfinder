@@ -47,6 +47,7 @@ function toForm(property: Property): FormState {
     noBrokerage: property.noBrokerage,
     bachelorFriendly: property.bachelorFriendly,
     familyFriendly: property.familyFriendly,
+    girlsFriendly: property.girlsFriendly,
     petFriendly: property.petFriendly,
     images: property.images || [],
     amenities: property.amenities || [],
@@ -148,6 +149,9 @@ export default function AdminPropertyEdit() {
         <section><h2 className="mb-3 font-display text-lg font-semibold">Property information</h2><div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {fields.map(([key, label, type]) => <label key={key} className="text-sm font-medium text-ink">{label}<input type={type || "text"} value={String(form[key] ?? "")} onChange={(event) => update({ [key]: event.target.value })} className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal outline-none focus:border-primary" /></label>)}
           <label className="text-sm font-medium text-ink">Furnishing<select value={String(form.furnishing)} onChange={(event) => update({ furnishing: event.target.value })} className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal"><option>FURNISHED</option><option>SEMI_FURNISHED</option><option>UNFURNISHED</option></select></label>
+        </div></section>
+        <section><h2 className="mb-3 font-display text-lg font-semibold">Allowed tenants</h2><div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {([["bachelorFriendly", "Bachelors"], ["familyFriendly", "Families"], ["girlsFriendly", "Girls / women"]] as const).map(([field, label]) => <label key={field} className="flex items-center gap-2 rounded-lg border border-line px-3 py-2.5 text-sm"><input type="checkbox" checked={Boolean(form[field])} onChange={(event) => update({ [field]: event.target.checked })} className="h-4 w-4 accent-[var(--color-primary)]" />{label}</label>)}
         </div></section>
         <section><h2 className="mb-3 font-display text-lg font-semibold">Owner</h2><div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {user && form.ownerId !== user.id && <button type="button" onClick={() => update({ ownerId: user.id, ownerPhone: "" })} className="rounded-lg border border-primary bg-primary-soft px-3 py-2.5 text-left text-sm font-semibold text-primary sm:col-span-2">Make this listing mine<span className="mt-0.5 block text-xs font-normal">Assign this property to {user.name} ({user.email})</span></button>}

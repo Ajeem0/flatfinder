@@ -203,6 +203,7 @@ export default function PropertyDetail() {
               <DL label="Property age" value={property.propertyAgeYears ? `${property.propertyAgeYears} yrs` : "New"} />
               <DL label="Bachelors" value={property.bachelorFriendly ? "Allowed" : "Not allowed"} />
               <DL label="Families" value={property.familyFriendly ? "Allowed" : "Not allowed"} />
+              <DL label="Girls / women" value={property.girlsFriendly ? "Allowed" : "Not allowed"} />
               <DL label="Pets" value={property.petFriendly ? "Allowed" : "Not allowed"} />
             </dl>
           </Section>

@@ -1,0 +1,1 @@
+ALTER TABLE "Property" ADD COLUMN "girlsFriendly" BOOLEAN NOT NULL DEFAULT true;

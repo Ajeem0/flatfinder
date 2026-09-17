@@ -45,6 +45,7 @@ export interface Property {
   noBrokerage: boolean;
   bachelorFriendly: boolean;
   familyFriendly: boolean;
+  girlsFriendly: boolean;
   petFriendly: boolean;
   availableFrom: string | null;
   status: ListingStatus;

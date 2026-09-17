@@ -48,6 +48,7 @@ function serializeProperty(p, favoritedIds = new Set()) {
     noBrokerage: p.noBrokerage,
     bachelorFriendly: p.bachelorFriendly,
     familyFriendly: p.familyFriendly,
+    girlsFriendly: p.girlsFriendly,
     petFriendly: p.petFriendly,
     availableFrom: p.availableFrom,
     status: p.status,
@@ -264,6 +265,7 @@ router.post(
         brokerage, noBrokerage, bachelorFriendly, familyFriendly, petFriendly,
         availableFrom, address, pincode, latitude, longitude,
         cityName, locationName, videoUrl, images = [], amenities = [],
+        girlsFriendly,
         listingType, roomType, existingFlatmates, preferredGender, preferredAgeRange,
         occupation, foodPreference, smokingPreference, drinkingPreference, petsPreference, contactPreference,
       } = req.body;
@@ -306,6 +308,7 @@ router.post(
           noBrokerage: Boolean(noBrokerage),
           bachelorFriendly: bachelorFriendly !== false,
           familyFriendly: familyFriendly !== false,
+          girlsFriendly: girlsFriendly !== false,
           petFriendly: Boolean(petFriendly),
           availableFrom: availableFrom ? new Date(availableFrom) : null,
           address,
@@ -408,7 +411,7 @@ router.put("/:id", requireAuth, async (req, res, next) => {
     const {
       title, description, bhk, areaSqft, floor, totalFloors, furnishing,
       propertyAgeYears, monthlyRent, securityDeposit, maintenance, brokerage,
-      noBrokerage, bachelorFriendly, familyFriendly, petFriendly, availableFrom,
+      noBrokerage, bachelorFriendly, familyFriendly, girlsFriendly, petFriendly, availableFrom,
       address, pincode, latitude, longitude, videoUrl, images, amenities, cityName, locationName, status, ownerId,
       listingType, roomType, existingFlatmates, preferredGender, preferredAgeRange, occupation, foodPreference,
       smokingPreference, drinkingPreference, petsPreference, contactPreference,
@@ -417,7 +420,7 @@ router.put("/:id", requireAuth, async (req, res, next) => {
     const data = {
       title, description, bhk, areaSqft, floor, totalFloors, furnishing,
       propertyAgeYears, monthlyRent, securityDeposit, maintenance, brokerage,
-      noBrokerage, bachelorFriendly, familyFriendly, petFriendly, address, pincode,
+      noBrokerage, bachelorFriendly, familyFriendly, girlsFriendly, petFriendly, address, pincode,
       listingType, roomType, existingFlatmates, preferredGender, preferredAgeRange, occupation, foodPreference,
       smokingPreference, drinkingPreference, petsPreference, contactPreference,
     };
