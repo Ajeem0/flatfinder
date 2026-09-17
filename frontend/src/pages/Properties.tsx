@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { SlidersHorizontal, LayoutGrid, List, X } from "lucide-react";
 import PropertyCard from "../components/PropertyCard";
 import FilterSidebar, { ActiveFilterPills, EMPTY_FILTERS, type FilterState } from "../components/FilterSidebar";
@@ -66,10 +66,13 @@ export default function Properties() {
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { notify } = useToast();
+  const location = useLocation();
+  const [hasMore, setHasMore] = useState(false);
 
   const fetchResults = useCallback(async () => {
+    if (authLoading) return;
     setResults(null);
     setError(null);
     try {
@@ -78,12 +81,13 @@ export default function Properties() {
       setResults(res.results);
       setTotal(res.pagination.total);
       setTotalPages(res.pagination.totalPages || 1);
+      setHasMore(Boolean(res.hasMore));
     } catch (err) {
       setResults([]);
       setError(err instanceof ApiError ? err.message : "Something went wrong loading properties.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, sort, page, q]);
+  }, [authLoading, filters, sort, page, q, user?.id]);
 
   // Debounced fetch so typing in the city/budget fields doesn't spam the API.
   useEffect(() => {
@@ -203,7 +207,21 @@ export default function Properties() {
                 ))}
               </div>
 
-              {totalPages > 1 && (
+              {!user && hasMore && results.length === 3 && (
+                <div className="mt-8 rounded-2xl border border-line bg-primary-soft p-6 text-center" data-reveal>
+                  <h2 className="font-display text-lg font-semibold text-ink">Want to see more flats?</h2>
+                  <p className="mt-1 text-sm text-ink-soft">Log in to view all available listings.</p>
+                  <Link
+                    to="/login"
+                    state={{ from: { pathname: location.pathname, search: location.search } }}
+                    className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-light"
+                  >
+                    Login / Sign In
+                  </Link>
+                </div>
+              )}
+
+              {user && totalPages > 1 && (
                 <div className="mt-8 flex items-center justify-center gap-2">
                   <button
                     disabled={page <= 1}

@@ -15,7 +15,8 @@ export default function Login() {
   const { notify } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: Location })?.from?.pathname || "/dashboard";
+  const fromState = (location.state as { from?: { pathname?: string; search?: string } })?.from;
+  const from = fromState ? `${fromState.pathname || "/dashboard"}${fromState.search || ""}` : "/dashboard";
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [googleUserType, setGoogleUserType] = useState<string | null>(null);

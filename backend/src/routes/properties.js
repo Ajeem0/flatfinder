@@ -205,8 +205,12 @@ router.get("/", optionalAuth, async (req, res, next) => {
         ? { createdAt: "desc" }
         : { createdAt: "desc" }; // "relevance" falls back to newest-first for this MVP
 
-    const take = Math.min(parseInt(pageSize, 10) || 12, 50);
-    const skip = (Math.max(parseInt(page, 10) || 1, 1) - 1) * take;
+    const isGuest = !req.user;
+    const requestedPage = Math.max(parseInt(page, 10) || 1, 1);
+    const requestedTake = Math.min(parseInt(pageSize, 10) || 12, 50);
+    const take = isGuest ? 3 : requestedTake;
+    const effectivePage = isGuest ? 1 : requestedPage;
+    const skip = (effectivePage - 1) * take;
 
     const [total, properties] = await Promise.all([
       prisma.property.count({ where }),
@@ -224,7 +228,13 @@ router.get("/", optionalAuth, async (req, res, next) => {
 
     res.json({
       results: properties.map((p) => serializeProperty(p, favoritedIds)),
-      pagination: { page: Number(page), pageSize: take, total, totalPages: Math.ceil(total / take) },
+      pagination: {
+        page: effectivePage,
+        pageSize: take,
+        total: isGuest ? Math.min(total, 3) : total,
+        totalPages: isGuest ? 1 : Math.ceil(total / take),
+      },
+      hasMore: isGuest ? total > 3 : false,
       parsedQuery: q ? smart : undefined,
     });
   } catch (err) {

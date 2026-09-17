@@ -89,6 +89,7 @@ export interface Pagination {
 export interface PropertySearchResponse {
   results: Property[];
   pagination: Pagination;
+  hasMore?: boolean;
 }
 
 export interface FavoriteItem {
