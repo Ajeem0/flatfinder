@@ -139,13 +139,15 @@ export default function Properties() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between gap-3 mb-2 flex-wrap" data-reveal>
-            <div>
-              <h1 className="font-display text-2xl font-semibold text-ink">{heading}</h1>
-              <p className="text-sm text-ink-soft mt-0.5">{results === null ? "Searching..." : `${total} propert${total === 1 ? "y" : "ies"} found`}</p>
+          <div className="mb-2 flex flex-col gap-3" data-reveal>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h1 className="font-display text-2xl font-semibold text-ink">{heading}</h1>
+                <p className="mt-0.5 text-sm text-ink-soft">{results === null ? "Searching..." : `${total} propert${total === 1 ? "y" : "ies"} found`}</p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setMobileFiltersOpen(true)}
                 className="lg:hidden flex items-center gap-1.5 rounded-full border border-line px-3 py-2 text-xs font-medium text-ink"
@@ -155,7 +157,7 @@ export default function Properties() {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="rounded-full border border-line px-3 py-2 text-xs font-medium text-ink outline-none focus:border-primary"
+                className="min-w-0 flex-1 rounded-full border border-line px-3 py-2 text-xs font-medium text-ink outline-none focus:border-primary sm:flex-none"
                 aria-label="Sort by"
               >
                 <option value="relevance">Sort: Relevance</option>
@@ -262,18 +264,21 @@ export default function Properties() {
       {/* Mobile filter drawer */}
       {mobileFiltersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-ink/40" onClick={() => setMobileFiltersOpen(false)} />
-          <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm overflow-y-auto bg-white p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-lg font-semibold">Filters</h2>
-              <button onClick={() => setMobileFiltersOpen(false)} aria-label="Close filters">
+          <div className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]" onClick={() => setMobileFiltersOpen(false)} />
+          <div className="absolute inset-x-0 bottom-0 mx-auto h-[88vh] max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-[28px] bg-white p-5 shadow-[0_-18px_40px_rgba(20,22,43,0.18)]">
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-line" />
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-lg font-semibold text-ink">Filters</h2>
+              <button onClick={() => setMobileFiltersOpen(false)} aria-label="Close filters" className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white">
                 <X size={20} />
               </button>
             </div>
-            <FilterSidebar filters={filters} onChange={updateFilters} onClear={() => setFilters(EMPTY_FILTERS)} />
+            <div className="pb-2">
+              <FilterSidebar filters={filters} onChange={updateFilters} onClear={() => setFilters(EMPTY_FILTERS)} />
+            </div>
             <button
               onClick={() => setMobileFiltersOpen(false)}
-              className="mt-6 w-full rounded-full bg-primary py-3 text-sm font-semibold text-white"
+              className="mt-6 w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-white shadow-sm"
             >
               Show {total} results
             </button>

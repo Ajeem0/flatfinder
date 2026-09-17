@@ -57,8 +57,8 @@ export default function SearchBar() {
       </div>
 
       {smartMode ? (
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
-          <div className="flex-1 flex items-center gap-2 rounded-xl border border-line px-3 py-3">
+        <form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-1 items-center gap-2 rounded-xl border border-line px-3 py-3">
             <SearchIcon size={16} className="text-ink-soft shrink-0" />
             <input
               value={smartQuery}
@@ -69,13 +69,13 @@ export default function SearchBar() {
           </div>
           <button
             type="submit"
-            className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary-light transition-colors"
+            className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-light"
           >
             Search
           </button>
         </form>
       ) : (
-        <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_0.8fr_1.2fr_auto] gap-2">
+        <form onSubmit={handleSearch} className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_0.8fr_1.2fr_auto]">
           <label className="flex items-center gap-2 rounded-xl border border-line px-3 py-3">
             <MapPin size={16} className="text-primary shrink-0" />
             <input
@@ -138,7 +138,7 @@ export default function SearchBar() {
 
           <button
             type="submit"
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary-light transition-colors"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-light"
           >
             <SearchIcon size={16} />
             <span className="lg:hidden">Search</span>

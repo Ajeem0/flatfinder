@@ -15,20 +15,20 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 pb-24 lg:pb-8">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-semibold text-ink">
             {isOwner ? "Owner dashboard" : "My dashboard"}
           </h1>
-          <p className="text-sm text-ink-soft mt-0.5">Welcome back, {user?.name}.</p>
+          <p className="mt-0.5 text-sm text-ink-soft">Welcome back, {user?.name}.</p>
         </div>
         {isOwner && (
-          <Link to="/post-property" className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white">
+          <Link to="/post-property" className="flex w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white sm:w-auto">
             <PlusCircle size={16} /> Add property
           </Link>
         )}
         {isAdmin && (
-          <Link to="/admin/listings" className="flex items-center gap-1.5 rounded-full border border-line px-4 py-2.5 text-sm font-semibold text-ink hover:border-primary hover:text-primary">
+          <Link to="/admin/listings" className="flex w-full items-center justify-center gap-1.5 rounded-full border border-line px-4 py-2.5 text-sm font-semibold text-ink hover:border-primary hover:text-primary sm:w-auto">
             Approve listings
           </Link>
         )}
@@ -87,19 +87,19 @@ function AdminProfile() {
       <div className="mt-4 flex max-w-md flex-col gap-2 sm:flex-row sm:items-end">
         <label className="flex-1 text-sm font-medium text-ink">
           Phone number
-          <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+91 98765 43210" className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 font-normal outline-none focus:border-primary" />
+          <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+91 98765 43210" className="mt-1.5 w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 font-normal outline-none focus:border-primary" />
         </label>
-        <button onClick={savePhone} disabled={saving} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
+        <button onClick={savePhone} disabled={saving} className="min-h-[44px] rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
           {saving ? "Saving..." : "Save number"}
         </button>
       </div>
       <div className="mt-6 border-t border-line pt-5">
         <h3 className="font-display text-base font-semibold text-ink">Change admin password</h3>
         <div className="mt-3 grid max-w-md gap-3">
-          <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Current password" autoComplete="current-password" className="w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
-          <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="New password (6+ characters)" autoComplete="new-password" className="w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
-          <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Confirm new password" autoComplete="new-password" className="w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
-          <button onClick={savePassword} disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword} className="w-fit rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary disabled:opacity-50">
+          <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Current password" autoComplete="current-password" className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="New password (6+ characters)" autoComplete="new-password" className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Confirm new password" autoComplete="new-password" className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <button onClick={savePassword} disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword} className="w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary disabled:opacity-50 sm:w-fit">
             {savingPassword ? "Updating..." : "Update password"}
           </button>
         </div>
@@ -121,7 +121,7 @@ function TenantDashboard() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <StatCard icon={<Heart size={16} />} label="Saved properties" value={favorites?.length ?? "—"} />
         <StatCard icon={<MessageSquare size={16} />} label="Enquiries sent" value={enquiries?.length ?? "—"} />
         <StatCard icon={<CalendarDays size={16} />} label="Scheduled visits" value={visits?.length ?? "—"} />
@@ -136,10 +136,10 @@ function TenantDashboard() {
         ) : (
           <div className="flex flex-col divide-y divide-line rounded-2xl border border-line bg-white">
             {enquiries.map((e) => (
-              <div key={e.id} className="flex items-center justify-between gap-3 p-4">
+              <div key={e.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <Link to={`/property/${e.property.slug}`} className="font-medium text-sm text-ink hover:text-primary">{e.property.title}</Link>
-                  <p className="text-xs text-ink-soft mt-0.5">{formatRent(e.property.monthlyRent)}/mo · Sent {formatDate(e.createdAt)}</p>
+                  <p className="mt-0.5 text-xs text-ink-soft">{formatRent(e.property.monthlyRent)}/mo · Sent {formatDate(e.createdAt)}</p>
                 </div>
                 <StatusBadge status={e.status} />
               </div>
@@ -226,7 +226,7 @@ function OwnerDashboard() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <StatCard icon={<Home size={16} />} label="Live listings" value={listings?.length ?? "—"} />
         <StatCard icon={<Eye size={16} />} label="Total views" value={totalViews} />
         <StatCard icon={<MessageSquare size={16} />} label="Enquiries" value={enquiries?.length ?? "—"} />
@@ -245,17 +245,17 @@ function OwnerDashboard() {
         ) : (
           <div className="flex flex-col divide-y divide-line rounded-2xl border border-line bg-white">
             {listings.map((p) => (
-              <div key={p.id} className="flex items-center justify-between gap-3 p-4 flex-wrap">
+              <div key={p.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <Link to={`/property/${p.slug}`} className="font-medium text-sm text-ink hover:text-primary">{p.title}</Link>
-                  <p className="text-xs text-ink-soft mt-0.5">{formatRent(p.monthlyRent)}/mo · {p.viewCount} views</p>
+                  <p className="mt-0.5 text-xs text-ink-soft">{formatRent(p.monthlyRent)}/mo · {p.viewCount} views</p>
                   {p.status === "PENDING" && (
                     <p className="mt-1 text-xs font-medium text-amber">
                       Waiting for admin approval. It will appear in Rent after it is published.
                     </p>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge status={p.status} />
                   {p.status === "PENDING" && (
                     <span className="rounded-full bg-amber-soft px-2.5 py-1 text-[11px] font-semibold text-amber">
@@ -267,7 +267,7 @@ function OwnerDashboard() {
                       Mark rented
                     </button>
                   )}
-                  <button onClick={() => deleteListing(p.id)} aria-label="Delete listing" className="p-1.5 text-ink-soft hover:text-danger">
+                  <button onClick={() => deleteListing(p.id)} aria-label="Delete listing" className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-soft hover:text-danger">
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -285,10 +285,10 @@ function OwnerDashboard() {
         ) : (
           <div className="flex flex-col divide-y divide-line rounded-2xl border border-line bg-white">
             {enquiries.map((e) => (
-              <div key={e.id} className="flex items-center justify-between gap-3 p-4 flex-wrap">
+              <div key={e.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-medium text-sm text-ink">{e.user?.name} — <span className="text-ink-soft">{e.property.title}</span></p>
-                  <p className="text-xs text-ink-soft mt-0.5">{e.user?.phone || e.user?.email} · {formatDate(e.createdAt)}</p>
+                  <p className="mt-0.5 text-xs text-ink-soft">{e.user?.phone || e.user?.email} · {formatDate(e.createdAt)}</p>
                 </div>
                 <StatusBadge status={e.status} />
               </div>
@@ -302,12 +302,12 @@ function OwnerDashboard() {
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
   return (
-    <div className="rounded-2xl border border-line bg-white p-4">
-      <div className="flex items-center gap-1.5 text-ink-soft mb-2">
+    <div className="rounded-2xl border border-line bg-white p-3 sm:p-4">
+      <div className="mb-2 flex items-center gap-1.5 text-ink-soft">
         {icon}
-        <span className="text-xs font-medium">{label}</span>
+        <span className="text-[10px] font-medium sm:text-xs">{label}</span>
       </div>
-      <p className="font-display text-2xl font-semibold text-ink">{value}</p>
+      <p className="font-display text-xl font-semibold text-ink sm:text-2xl">{value}</p>
     </div>
   );
 }

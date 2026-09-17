@@ -295,8 +295,8 @@ export default function PropertyDetail() {
       </div>
 
       {/* Sticky mobile contact bar */}
-      <div className="fixed bottom-14 left-0 right-0 z-30 border-t border-line bg-white p-3 lg:hidden">
-        <button onClick={contactOwner} className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-semibold text-white">
+      <div className="fixed bottom-14 left-0 right-0 z-30 border-t border-line bg-white px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 lg:hidden">
+        <button onClick={contactOwner} className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-white shadow-sm">
           <Phone size={16} /> Contact Owner
         </button>
       </div>

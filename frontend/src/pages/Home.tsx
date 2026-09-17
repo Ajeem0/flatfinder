@@ -63,32 +63,32 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/95 via-primary/85 to-primary" />
 
-        <div className="relative mx-auto max-w-7xl px-4 pt-16 pb-28 sm:px-6 sm:pt-24 sm:pb-36 text-center">
-          <span className="hero-badge inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/90 mb-5">
+        <div className="relative mx-auto max-w-7xl px-3 pt-12 pb-20 sm:px-6 sm:pt-24 sm:pb-36 text-center">
+          <span className="hero-badge inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium text-white/90 mb-4 sm:text-xs sm:mb-5">
             <ShieldCheck size={13} /> Verified owners across 7 cities
           </span>
-          <h1 className="hero-title font-display text-4xl sm:text-6xl font-semibold text-white leading-[1.05] max-w-3xl mx-auto">
+          <h1 className="hero-title mx-auto max-w-3xl font-display text-3xl font-semibold leading-[1.08] text-white sm:text-6xl">
             Find a place you'll love to live.
           </h1>
-          <p className="hero-copy mt-4 max-w-xl mx-auto text-base sm:text-lg text-white/80">
+          <p className="hero-copy mx-auto mt-3 max-w-xl text-sm text-white/80 sm:mt-4 sm:text-lg">
             Discover flats, apartments, PGs and rooms that match your budget, location and lifestyle.
           </p>
         </div>
       </section>
 
       {/* Floating search card, overlapping hero/content boundary */}
-      <div className="relative -mt-20 sm:-mt-24 mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="relative -mt-14 sm:-mt-24 mx-auto max-w-5xl px-3 sm:px-6">
         <div className="hero-cta">
           <SearchBar />
         </div>
 
-        <div className="hero-cta mt-5 flex flex-wrap items-center justify-center gap-2">
-          <span className="text-xs font-medium text-ink-soft mr-1">Popular:</span>
+        <div className="hero-cta mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:mt-5 sm:gap-2">
+          <span className="mr-1 text-[10px] font-medium text-ink-soft sm:text-xs">Popular:</span>
           {POPULAR_CITIES.map((city) => (
             <Link
               key={city}
               to={`/properties?city=${city}`}
-              className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-ink hover:border-primary hover:text-primary transition-colors"
+              className="rounded-full border border-line bg-white px-2.5 py-1.5 text-[10px] font-medium text-ink transition-colors hover:border-primary hover:text-primary sm:px-3 sm:text-xs"
             >
               {city}
             </Link>

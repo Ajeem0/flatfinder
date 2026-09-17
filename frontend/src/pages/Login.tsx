@@ -62,12 +62,12 @@ export default function Login() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12">
-      <h1 className="font-display text-2xl font-semibold text-ink mb-1">Log in to FlatFinder</h1>
-      <p className="text-sm text-ink-soft mb-6">New here? <Link to="/signup" className="text-primary font-medium hover:underline">Create an account</Link></p>
+    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-8 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:py-12 sm:pb-12">
+      <h1 className="mb-1 font-display text-2xl font-semibold text-ink sm:text-3xl">Log in to FlatFinder</h1>
+      <p className="mb-6 text-sm text-ink-soft">New here? <Link to="/signup" className="font-medium text-primary hover:underline">Create an account</Link></p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-danger">{error}</p>}
+        {error && <p role="alert" className="rounded-xl bg-red-50 px-3 py-2.5 text-sm text-danger">{error}</p>}
 
         <Field label="Email" htmlFor="email">
           <input
@@ -102,14 +102,14 @@ export default function Login() {
         <button
           type="submit"
           disabled={submitting || !form.email.trim() || !form.password.trim()}
-          className="rounded-full bg-primary py-3 text-sm font-semibold text-white hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-primary py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? "Logging in..." : "Log in"}
         </button>
       </form>
 
       <div className="my-5 flex items-center gap-3 text-xs text-ink-soft"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
-      <div className="rounded-xl border border-line bg-white p-4">
+      <div className="rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-5">
         <p className="mb-3 text-sm font-semibold text-ink">Continue with Google as</p>
         <div className="grid grid-cols-2 gap-2">
           {GOOGLE_USER_TYPES.map((option) => (
@@ -118,7 +118,7 @@ export default function Login() {
               key={option.value}
               onClick={() => setGoogleUserType(option.value)}
               aria-pressed={googleUserType === option.value}
-              className={`rounded-lg border px-3 py-2.5 text-sm font-medium ${googleUserType === option.value ? "border-primary bg-primary-soft text-primary" : "border-line text-ink"}`}
+              className={`min-h-[46px] rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${googleUserType === option.value ? "border-primary bg-primary-soft text-primary" : "border-line text-ink"}`}
             >
               {option.label}
             </button>
@@ -137,7 +137,7 @@ export default function Login() {
   );
 }
 
-export const inputClass = "w-full rounded-lg border border-line px-3.5 py-2.5 text-sm outline-none focus:border-primary";
+export const inputClass = "w-full min-h-[46px] rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 export function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (

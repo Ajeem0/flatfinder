@@ -256,9 +256,9 @@ function PostPropertyForm() {
       <p className="text-sm text-ink-soft mb-6">Step {step + 1} of {STEPS.length}: {STEPS[step]}</p>
 
       {/* Stepper */}
-      <div className="flex items-center gap-1.5 mb-8 overflow-x-auto pb-1">
+      <div className="mb-8 flex items-center gap-1.5 overflow-x-auto pb-1">
         {STEPS.map((label, i) => (
-          <div key={label} className="flex items-center gap-1.5 shrink-0">
+          <div key={label} className="flex shrink-0 items-center gap-1.5">
             <div
               className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
                 i < step ? "bg-verified text-white" : i === step ? "bg-primary text-white" : "bg-line text-ink-soft"
@@ -266,7 +266,7 @@ function PostPropertyForm() {
             >
               {i < step ? <Check size={14} /> : i + 1}
             </div>
-            {i < STEPS.length - 1 && <div className={`h-0.5 w-6 ${i < step ? "bg-verified" : "bg-line"}`} />}
+            {i < STEPS.length - 1 && <div className={`h-0.5 w-4 sm:w-6 ${i < step ? "bg-verified" : "bg-line"}`} />}
           </div>
         ))}
       </div>
@@ -281,7 +281,7 @@ function PostPropertyForm() {
                 <button
                   key={t}
                   onClick={() => update({ propertyType: t })}
-                  className={`rounded-xl border px-3 py-4 text-sm font-medium capitalize ${
+                  className={`min-h-[48px] rounded-xl border px-3 py-3 text-sm font-medium capitalize ${
                     form.propertyType === t ? "border-primary bg-primary-soft text-primary" : "border-line text-ink"
                   }`}
                 >
@@ -396,7 +396,7 @@ function PostPropertyForm() {
                   <button
                     key={a}
                     onClick={() => update({ amenities: active ? form.amenities.filter((x) => x !== a) : [...form.amenities, a] })}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "border-primary bg-primary-soft text-primary" : "border-line text-ink-soft"}`}
+                    className={`min-h-[38px] rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "border-primary bg-primary-soft text-primary" : "border-line text-ink-soft"}`}
                   >
                     {a}
                   </button>
@@ -493,21 +493,21 @@ function PostPropertyForm() {
         )}
       </div>
 
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           onClick={back}
           disabled={step === 0}
-          className="flex items-center gap-1 rounded-full border border-line px-4 py-2.5 text-sm font-medium text-ink disabled:opacity-40"
+          className="flex w-full items-center justify-center gap-1 rounded-full border border-line px-4 py-2.5 text-sm font-medium text-ink disabled:opacity-40 sm:w-auto"
         >
           <ChevronLeft size={16} /> Back
         </button>
 
         {step < STEPS.length - 1 ? (
-          <button onClick={next} className="flex items-center gap-1 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white">
+          <button onClick={next} className="flex w-full items-center justify-center gap-1 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white sm:w-auto">
             Next <ChevronRight size={16} />
           </button>
         ) : (
-          <button onClick={submit} disabled={submitting} className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
+          <button onClick={submit} disabled={submitting} className="w-full rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60 sm:w-auto">
             {submitting ? "Publishing..." : "Submit for review"}
           </button>
         )}
@@ -540,7 +540,7 @@ function TextField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm outline-none focus:border-primary disabled:bg-canvas disabled:text-ink-soft"
+        className="w-full min-h-[44px] rounded-xl border border-line px-3.5 py-2.5 text-sm outline-none focus:border-primary disabled:bg-canvas disabled:text-ink-soft"
       />
     </div>
   );
@@ -554,7 +554,7 @@ function SelectField({
   return (
     <div>
       <label className="block text-sm font-medium text-ink mb-1.5">{label}</label>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm outline-none focus:border-primary">
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full min-h-[44px] rounded-xl border border-line px-3.5 py-2.5 text-sm outline-none focus:border-primary">
         {options.map((o) => (
           <option key={o} value={o}>{labels?.[o] || o}</option>
         ))}

@@ -105,21 +105,23 @@ export default function PropertyCard({ property, onToggleFavorite, favoritePendi
           )}
         </div>
       </Link>
-      <div className="flex gap-2 px-4 pb-4">
-        <Link to={`/property/${property.slug}`} className="flex-1 rounded-full border border-line py-2 text-center text-xs font-semibold text-ink">View details</Link>
+      <div className="flex flex-col gap-2 px-4 pb-4 sm:flex-row">
+        <Link to={`/property/${property.slug}`} className="w-full rounded-full border border-line py-2 text-center text-xs font-semibold text-ink sm:flex-1">
+          View details
+        </Link>
         {onSelect && (
           <button
             type="button"
             onClick={() => onSelect(property)}
             aria-pressed={selected}
-            className={`flex items-center justify-center gap-1 rounded-full px-3 py-2 text-xs font-semibold ${selected ? "bg-primary-soft text-primary" : "bg-primary text-white"}`}
+            className={`flex w-full items-center justify-center gap-1 rounded-full px-3 py-2 text-xs font-semibold sm:w-auto ${selected ? "bg-primary-soft text-primary" : "bg-primary text-white"}`}
           >
             {selected && <Check size={13} />}
             {selected ? "Selected" : selectLabel}
           </button>
         )}
         {onChat && (
-          <button type="button" onClick={() => onChat(property)} className="flex items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-white">
+          <button type="button" onClick={() => onChat(property)} className="flex w-full items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-white sm:w-auto">
             <MessageCircle size={13} /> Chat
           </button>
         )}

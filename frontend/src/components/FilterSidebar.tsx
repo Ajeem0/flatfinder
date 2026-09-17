@@ -63,7 +63,7 @@ export default function FilterSidebar({ filters, onChange, onClear, className = 
   }
 
   return (
-    <aside className={`flex flex-col gap-6 ${className}`}>
+    <aside className={`flex flex-col gap-5 ${className}`}>
       <div className="flex items-center justify-between">
         <h2 className="font-display text-lg font-semibold text-ink">Filters</h2>
         <button onClick={onClear} className="text-xs font-medium text-primary hover:underline">
@@ -76,7 +76,7 @@ export default function FilterSidebar({ filters, onChange, onClear, className = 
           value={filters.city}
           onChange={(e) => onChange({ city: e.target.value })}
           placeholder="City or area"
-          className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-primary"
+          className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary"
         />
       </FilterGroup>
 
@@ -88,7 +88,7 @@ export default function FilterSidebar({ filters, onChange, onClear, className = 
             value={filters.minRent}
             onChange={(e) => onChange({ minRent: e.target.value })}
             placeholder="Min"
-            className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-primary"
+            className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary"
           />
           <span className="text-ink-soft">–</span>
           <input
@@ -97,7 +97,7 @@ export default function FilterSidebar({ filters, onChange, onClear, className = 
             value={filters.maxRent}
             onChange={(e) => onChange({ maxRent: e.target.value })}
             placeholder="Max"
-            className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-primary"
+            className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary"
           />
         </div>
       </FilterGroup>
@@ -106,7 +106,7 @@ export default function FilterSidebar({ filters, onChange, onClear, className = 
         <select
           value={filters.propertyType}
           onChange={(e) => onChange({ propertyType: e.target.value })}
-          className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-primary"
+          className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary"
         >
           <option value="">Any type</option>
           <option value="APARTMENT">Apartment</option>
@@ -179,7 +179,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+      className={`min-h-[38px] rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
         active ? "border-primary bg-primary-soft text-primary" : "border-line text-ink-soft hover:border-primary/50"
       }`}
     >
@@ -190,7 +190,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 
 function Checkbox({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-ink cursor-pointer">
+    <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer">
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 rounded border-line accent-[var(--color-primary)]" />
       {label}
     </label>

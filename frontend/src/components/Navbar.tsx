@@ -33,7 +33,7 @@ export default function Navbar() {
           scrolled ? "bg-surface/80 shadow-[0_10px_25px_rgba(20,22,43,0.06)] backdrop-blur-xl" : "bg-surface/90 backdrop-blur"
         }`}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-3 py-3 sm:px-6">
           <Link to="/" className="logo-mark flex items-center gap-2 shrink-0 transition-transform duration-200 hover:scale-[1.01]">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white font-display font-bold shadow-[0_8px_18px_rgba(55,48,165,0.25)]">F</span>
             <span className="font-display text-lg font-semibold tracking-tight text-ink">FlatFinder</span>
@@ -100,7 +100,11 @@ export default function Navbar() {
             )}
           </div>
 
-          <button className="lg:hidden text-ink" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu">
+          <button
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white/80 text-ink shadow-sm lg:hidden"
+            onClick={() => setOpen((o) => !o)}
+            aria-label="Toggle menu"
+          >
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
@@ -149,12 +153,14 @@ export default function Navbar() {
         )}
       </header>
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-line bg-surface/95 backdrop-blur py-2 px-2 shadow-[0_-10px_20px_rgba(20,22,43,0.04)]">
-        <MobileTab to="/" icon={<Home size={20} />} label="Home" />
-        <MobileTab to="/properties" icon={<Search size={20} />} label="Search" />
-        {canPostProperty && <MobileTab to="/post-property" icon={<PlusCircle size={20} />} label="Post" />}
-        <MobileTab to="/favorites" icon={<Heart size={20} />} label="Saved" />
-        <MobileTab to={user ? "/dashboard" : "/login"} icon={<UserIcon size={20} />} label={user ? "You" : "Login"} />
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-surface/95 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-10px_20px_rgba(20,22,43,0.04)] backdrop-blur">
+        <div className="mx-auto flex max-w-md items-center justify-around gap-1 px-2">
+          <MobileTab to="/" icon={<Home size={20} />} label="Home" />
+          <MobileTab to="/properties" icon={<Search size={20} />} label="Search" />
+          {canPostProperty && <MobileTab to="/post-property" icon={<PlusCircle size={20} />} label="Post" />}
+          <MobileTab to="/favorites" icon={<Heart size={20} />} label="Saved" />
+          <MobileTab to={user ? "/dashboard" : "/login"} icon={<UserIcon size={20} />} label={user ? "You" : "Login"} />
+        </div>
       </nav>
     </>
   );
@@ -165,13 +171,13 @@ function MobileTab({ to, icon, label }: { to: string; icon: React.ReactNode; lab
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+        `flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-2 text-[11px] font-medium transition-colors ${
           isActive ? "text-primary" : "text-ink-soft"
         }`
       }
     >
       {icon}
-      {label}
+      <span className="truncate">{label}</span>
     </NavLink>
   );
 }

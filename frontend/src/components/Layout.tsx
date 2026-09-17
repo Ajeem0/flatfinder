@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
       <Navbar />
-      <main className={`page-shell flex-1 ${ready ? "is-ready" : ""}`}>
+      <main className={`page-shell flex-1 pb-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom))] md:pb-0 ${ready ? "is-ready" : ""}`}>
         {children}
       </main>
       <Footer />
