@@ -96,6 +96,10 @@ model User {
   userType           UserType      @default(TENANT)
   profilePhotoUrl    String?
   isPhoneVerified    Boolean       @default(false)
+  phoneOtpHash       String?
+  phoneOtpExpiresAt  DateTime?
+  phoneOtpSentAt     DateTime?
+  phoneOtpAttempts   Int           @default(0)
   preferredLocation  String?
   budgetMin          Int?
   budgetMax          Int?

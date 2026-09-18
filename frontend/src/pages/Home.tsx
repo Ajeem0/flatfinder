@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, BadgeCheck, Sparkles } from "lucide-react";
 import SearchBar from "../components/SearchBar";
@@ -17,6 +17,7 @@ export default function Home() {
   const { user } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
+  const propertySectionRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
       const params = new URLSearchParams({ sort: "newest", pageSize: "6" });
@@ -48,6 +49,10 @@ export default function Home() {
     setShowLoginPrompt(true);
   }
 
+  function showFeaturedProperties() {
+    propertySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <div className="overflow-hidden">
       <section
@@ -73,7 +78,7 @@ export default function Home() {
               Explore real flats, PGs and rooms with clear pricing, verified owners and spaces that feel like home.
             </p>
             <div className="hero-cta mt-7 flex flex-wrap items-center gap-3">
-              <button onClick={openAllProperties} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink shadow-lg transition-transform hover:-translate-y-0.5">
+              <button onClick={showFeaturedProperties} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink shadow-lg transition-transform hover:-translate-y-0.5">
                 Explore homes <ArrowRight size={16} />
               </button>
               <Link to="/post-property" className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/20">
@@ -113,7 +118,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 sm:pt-20">
+      <section ref={propertySectionRef} id="featured-properties" className="scroll-mt-24 mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 sm:pt-20">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Fresh on FlatFinder</p>
