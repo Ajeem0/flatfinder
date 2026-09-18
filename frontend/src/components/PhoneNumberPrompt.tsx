@@ -48,16 +48,19 @@ function getMsg91AccessToken(data: unknown): string {
     try {
       return getMsg91AccessToken(JSON.parse(data));
     } catch {
-      return "";
+      return data.length > 20 && !/^(success|ok|verified|otp verified)$/i.test(data.trim()) ? data : "";
     }
   }
   if (!data || typeof data !== "object") return "";
 
   const value = data as Record<string, unknown>;
   const tokenKey = Object.keys(value).find((key) =>
-    ["access-token", "access_token", "accesstoken", "accessToken", "token", "verificationToken"].includes(key)
+    ["access-token", "access_token", "accesstoken", "accessToken", "token", "verificationToken", "message"].includes(key)
   );
-  if (tokenKey && typeof value[tokenKey] === "string" && value[tokenKey]) return value[tokenKey];
+  if (tokenKey && typeof value[tokenKey] === "string") {
+    const token = getMsg91AccessToken(value[tokenKey]);
+    if (token) return token;
+  }
 
   for (const nestedValue of Object.values(value)) {
     const token: string = getMsg91AccessToken(nestedValue);
@@ -108,7 +111,7 @@ export default function PhoneNumberPrompt() {
         widgetId: MSG91_WIDGET_ID,
         tokenAuth: MSG91_TOKEN_AUTH,
         identifier: value,
-        exposeMethods: false,
+        exposeMethods: true,
         success: async (data) => {
           const accessToken = getMsg91AccessToken(data);
           if (!accessToken) {
