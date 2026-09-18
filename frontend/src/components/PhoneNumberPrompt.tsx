@@ -43,16 +43,27 @@ function loadMsg91Widget() {
   return msg91ScriptPromise;
 }
 
-function getMsg91AccessToken(data: unknown) {
+function getMsg91AccessToken(data: unknown): string {
+  if (typeof data === "string") {
+    try {
+      return getMsg91AccessToken(JSON.parse(data));
+    } catch {
+      return "";
+    }
+  }
   if (!data || typeof data !== "object") return "";
+
   const value = data as Record<string, unknown>;
-  return typeof value["access-token"] === "string"
-    ? value["access-token"]
-    : typeof value.accessToken === "string"
-      ? value.accessToken
-      : typeof value.token === "string"
-        ? value.token
-        : "";
+  const tokenKey = Object.keys(value).find((key) =>
+    ["access-token", "access_token", "accesstoken", "accessToken", "token", "verificationToken"].includes(key)
+  );
+  if (tokenKey && typeof value[tokenKey] === "string" && value[tokenKey]) return value[tokenKey];
+
+  for (const nestedValue of Object.values(value)) {
+    const token: string = getMsg91AccessToken(nestedValue);
+    if (token) return token;
+  }
+  return "";
 }
 
 export default function PhoneNumberPrompt() {
@@ -101,7 +112,7 @@ export default function PhoneNumberPrompt() {
         success: async (data) => {
           const accessToken = getMsg91AccessToken(data);
           if (!accessToken) {
-            setError("MSG91 did not return a verification token.");
+            setError("MSG91 verification succeeded, but no access token was returned. Please try again.");
             setWidgetStarted(false);
             return;
           }
