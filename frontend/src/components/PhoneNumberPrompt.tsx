@@ -106,12 +106,15 @@ export default function PhoneNumberPrompt() {
       await api.auth.requestPhoneOtp(value);
       if (!MSG91_TOKEN_AUTH) throw new Error("MSG91 OTP widget is not configured");
       await loadMsg91Widget();
+      if (typeof window.initSendOTP !== "function") {
+        throw new Error("MSG91 OTP widget did not load. Check the browser network connection.");
+      }
       setWidgetStarted(true);
-      window.initSendOTP?.({
+      window.initSendOTP({
         widgetId: MSG91_WIDGET_ID,
         tokenAuth: MSG91_TOKEN_AUTH,
         identifier: value,
-        exposeMethods: true,
+        exposeMethods: false,
         success: async (data) => {
           const accessToken = getMsg91AccessToken(data);
           if (!accessToken) {
