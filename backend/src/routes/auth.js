@@ -6,7 +6,7 @@ const { signToken } = require("../utils/jwt");
 const { requireAuth } = require("../middleware/auth");
 const { requireUserType } = require("../middleware/auth");
 const { OAuth2Client } = require("google-auth-library");
-const { OTP_RESEND_DELAY_MS, createPhoneOtp, hashPhoneOtp, sendPhoneOtp } = require("../utils/phoneOtp");
+const { verifyMsg91AccessToken } = require("../utils/phoneOtp");
 
 const router = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -160,7 +160,7 @@ router.put("/me", requireAuth, async (req, res, next) => {
   }
 });
 
-// POST /api/auth/phone/request -- save a number and send its verification code
+// POST /api/auth/phone/request -- save the number before MSG91 opens its widget
 router.post("/phone/request", requireAuth, async (req, res, next) => {
   try {
     const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
@@ -170,50 +170,41 @@ router.post("/phone/request", requireAuth, async (req, res, next) => {
     if (!user) return res.status(404).json({ error: "User not found" });
     const phoneField = user.userType === "ADMIN" ? "adminPhone" : "phone";
     if (user[phoneField] === phone && user.isPhoneVerified) return res.json({ verified: true });
-    if (user.phoneOtpSentAt && Date.now() - user.phoneOtpSentAt.getTime() < OTP_RESEND_DELAY_MS) {
-      return res.status(429).json({ error: "Please wait a minute before requesting another code" });
-    }
-
-    const { code, hash, expiresAt } = createPhoneOtp();
-    await prisma.user.update({
+    const updated = await prisma.user.update({
       where: { id: user.id },
       data: {
         [phoneField]: phone,
         isPhoneVerified: false,
-        phoneOtpHash: hash,
-        phoneOtpExpiresAt: expiresAt,
-        phoneOtpSentAt: new Date(),
+        phoneOtpHash: null,
+        phoneOtpExpiresAt: null,
+        phoneOtpSentAt: null,
         phoneOtpAttempts: 0,
       },
     });
-    try {
-      await sendPhoneOtp(phone, code);
-    } catch (error) {
-      await prisma.user.update({ where: { id: user.id }, data: { phoneOtpHash: null, phoneOtpExpiresAt: null, phoneOtpSentAt: null } });
-      return res.status(503).json({ error: error.message });
-    }
-    res.json({ verified: false, message: "Verification code sent" });
+    res.json({ user: publicUser(updated), verified: false });
   } catch (err) {
     next(err);
   }
 });
 
-// POST /api/auth/phone/verify -- verify the submitted phone number
+// POST /api/auth/phone/verify -- verify MSG91's widget access token
 router.post("/phone/verify", requireAuth, async (req, res, next) => {
   try {
-    const code = typeof req.body.code === "string" ? req.body.code.trim() : "";
+    const accessToken = typeof req.body.accessToken === "string" ? req.body.accessToken.trim() : "";
+    const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
+    if (!accessToken || !phone) return res.status(400).json({ error: "Phone number and MSG91 access token are required" });
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-    if (!user || !user.phoneOtpHash || !user.phoneOtpExpiresAt) return res.status(400).json({ error: "Request a verification code first" });
-    if (user.phoneOtpExpiresAt.getTime() < Date.now()) return res.status(400).json({ error: "That code has expired. Request a new one" });
-    if (user.phoneOtpAttempts >= 5) return res.status(429).json({ error: "Too many attempts. Request a new code" });
-
-    if (hashPhoneOtp(code) !== user.phoneOtpHash) {
-      await prisma.user.update({ where: { id: user.id }, data: { phoneOtpAttempts: { increment: 1 } } });
-      return res.status(400).json({ error: "Invalid verification code" });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const phoneField = user.userType === "ADMIN" ? "adminPhone" : "phone";
+    if (user[phoneField] !== phone) return res.status(400).json({ error: "The verified number does not match the requested number" });
+    try {
+      await verifyMsg91AccessToken(accessToken);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
     }
     const updated = await prisma.user.update({
       where: { id: user.id },
-      data: { isPhoneVerified: true, phoneOtpHash: null, phoneOtpExpiresAt: null, phoneOtpSentAt: null, phoneOtpAttempts: 0 },
+      data: { isPhoneVerified: true },
     });
     res.json({ user: publicUser(updated) });
   } catch (err) {

@@ -5,7 +5,7 @@ Express + PostgreSQL (via Prisma) backend for the FlatFinder rental marketplace.
 ## What's implemented
 
 - JWT auth: register, login, get/update profile (`/api/auth`)
-- Phone verification with expiring OTPs (`/api/auth/phone/request` and `/api/auth/phone/verify`)
+- Phone verification through the MSG91 OTP widget (`/api/auth/phone/request` and `/api/auth/phone/verify`)
 - Property search with filters (city, rent range, BHK, furnishing, amenities,
   bachelor/family/pet friendly, no-brokerage, available-from) + pagination + sorting (`/api/properties`)
 - A small rule-based "smart search" parser for free-text queries like
@@ -36,7 +36,7 @@ any of them built out next.
 ## Setup
 
 1. Install PostgreSQL locally (or use a hosted instance — Neon, Supabase, Railway all work).
-2. `cp .env.example .env` and fill in `DATABASE_URL` and `JWT_SECRET`. Configure the Twilio variables for SMS delivery; without them, local development prints the OTP in the backend log.
+2. `cp .env.example .env` and fill in `DATABASE_URL`, `JWT_SECRET`, and `MSG91_AUTH_KEY`.
   Keep `GOOGLE_CLIENT_ID` set to the Web application Client ID configured in Google Cloud Console.
 3. Install dependencies and generate the Prisma client:
 

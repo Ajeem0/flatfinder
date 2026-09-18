@@ -115,8 +115,8 @@ export const api = {
       request<{ user: User }>("/auth/me", { method: "PUT", body: JSON.stringify(payload) }),
     requestPhoneOtp: (phone: string) =>
       request<{ verified: boolean; message?: string }>("/auth/phone/request", { method: "POST", body: JSON.stringify({ phone }) }),
-    verifyPhoneOtp: (code: string) =>
-      request<{ user: User }>("/auth/phone/verify", { method: "POST", body: JSON.stringify({ code }) }),
+    verifyPhoneOtp: (payload: { phone: string; accessToken: string }) =>
+      request<{ user: User }>("/auth/phone/verify", { method: "POST", body: JSON.stringify({ phone: payload.phone, accessToken: payload.accessToken }) }),
     updateAdminPassword: (payload: { currentPassword: string; newPassword: string }) =>
       request<{ message: string }>("/auth/admin/password", { method: "PUT", body: JSON.stringify(payload) }),
   },
