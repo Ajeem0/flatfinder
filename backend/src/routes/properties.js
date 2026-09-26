@@ -47,7 +47,7 @@ const propertyListSelect = {
   status: true,
   createdAt: true,
   updatedAt: true,
-  images: { select: { thumbnailUrl: true, cardUrl: true, mediumUrl: true, largeUrl: true, width: true, height: true, blurDataUrl: true }, orderBy: { sortOrder: "asc" }, take: 1 },
+  images: { select: { url: true, thumbnailUrl: true, cardUrl: true, mediumUrl: true, largeUrl: true, width: true, height: true, blurDataUrl: true }, orderBy: { sortOrder: "asc" }, take: 1 },
   owner: { select: { userType: true, isPhoneVerified: true } },
   location: { select: { name: true, city: { select: { name: true } } } },
 };

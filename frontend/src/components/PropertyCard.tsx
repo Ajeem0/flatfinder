@@ -17,9 +17,9 @@ interface Props {
 }
 
 function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat, onSelect, selectLabel = "Select property", selected = false, imagePriority = false }: Props) {
-  const cover = property.images[0];
   const variant = property.imageVariants?.[0];
-  const src = variant?.cardUrl || variant?.mediumUrl || cover;
+  const cover = property.images[0] || variant?.thumbnailUrl || variant?.cardUrl || variant?.mediumUrl || variant?.largeUrl;
+  const src = variant?.cardUrl || variant?.mediumUrl || cover || undefined;
   const srcSet = [
     variant?.thumbnailUrl && `${variant.thumbnailUrl} 320w`,
     variant?.cardUrl && `${variant.cardUrl} 640w`,
