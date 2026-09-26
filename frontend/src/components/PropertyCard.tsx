@@ -32,7 +32,7 @@ function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay
 
   return (
     <div
-      className={`card-lift group relative flex flex-col overflow-hidden rounded-2xl border bg-surface shadow-sm ${selected ? "border-primary ring-2 ring-primary/15" : "border-line"}`}
+      className={`card-lift group relative flex min-w-0 flex-col overflow-hidden rounded-xl border bg-surface shadow-sm sm:rounded-2xl ${selected ? "border-primary ring-2 ring-primary/15" : "border-line"}`}
       data-reveal
       data-delay={revealDelay}
     >
@@ -55,14 +55,14 @@ function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay
           ) : (
             <div className="flex h-full items-center justify-center text-ink-soft text-sm">No photo yet</div>
           )}
-          <div className="absolute left-3 top-3 flex gap-1.5">
+          <div className="absolute left-1.5 top-1.5 flex max-w-[calc(100%-2.75rem)] gap-1 overflow-hidden sm:left-3 sm:top-3 sm:gap-1.5">
             {property.owner?.userType === "OWNER" ? (
-              <span className="rounded-full bg-verified px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">Owner</span>
+              <span className="rounded-full bg-verified px-1.5 py-0.5 text-[8px] font-semibold text-white shadow-sm sm:px-2.5 sm:py-1 sm:text-[11px]">Owner</span>
             ) : (
-              <span className="rounded-full bg-amber px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">Agent</span>
+              <span className="rounded-full bg-amber px-1.5 py-0.5 text-[8px] font-semibold text-white shadow-sm sm:px-2.5 sm:py-1 sm:text-[11px]">Agent</span>
             )}
             {property.noBrokerage && (
-              <span className="rounded-full bg-ink/80 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">No Brokerage</span>
+              <span className="hidden rounded-full bg-ink/80 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm sm:inline-flex">No Brokerage</span>
             )}
           </div>
         </div>
@@ -74,7 +74,7 @@ function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay
         aria-pressed={property.isFavorited}
         disabled={favoritePending}
         onClick={() => onToggleFavorite?.(property.id)}
-        className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition-transform hover:scale-110 disabled:opacity-60"
+        className="absolute right-1.5 top-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition-transform hover:scale-110 disabled:opacity-60 sm:right-3 sm:top-3 sm:h-9 sm:w-9"
       >
         <Heart
           size={18}
@@ -82,37 +82,36 @@ function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay
         />
       </button>
 
-      <Link to={`/property/${property.slug}`} className="flex flex-1 flex-col gap-2 p-4">
+      <Link to={`/property/${property.slug}`} className="flex min-w-0 flex-1 flex-col gap-1 p-2 sm:gap-2 sm:p-3 lg:p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-display text-base font-semibold leading-snug text-ink line-clamp-2">{property.title}</h3>
+          <h3 className="min-w-0 font-display text-[11px] font-semibold leading-tight text-ink line-clamp-2 sm:text-sm lg:text-base">{property.title}</h3>
         </div>
-        <p className="flex items-center gap-1 text-sm text-ink-soft">
-          <MapPin size={14} className="shrink-0" />
-          {property.locationName ? `${property.locationName}, ` : ""}
-          {property.city}
+        <p className="flex min-w-0 items-center gap-0.5 truncate text-[9px] text-ink-soft sm:gap-1 sm:text-xs lg:text-sm">
+          <MapPin size={11} className="shrink-0 sm:h-[14px] sm:w-[14px]" />
+          <span className="truncate">{property.locationName ? `${property.locationName}, ` : ""}{property.city}</span>
         </p>
 
-        <div className="flex items-baseline gap-1 pt-1">
-          <span className="price-figure font-display text-xl font-semibold text-primary">{formatRent(property.monthlyRent)}</span>
-          <span className="text-xs text-ink-soft">/month</span>
+        <div className="flex min-w-0 items-baseline gap-0.5 pt-0.5 sm:gap-1 sm:pt-1">
+          <span className="price-figure truncate font-display text-sm font-semibold text-primary sm:text-lg lg:text-xl">{formatRent(property.monthlyRent)}</span>
+          <span className="shrink-0 text-[8px] text-ink-soft sm:text-xs">/mo</span>
         </div>
 
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-soft">
+        <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[9px] text-ink-soft sm:mt-1 sm:gap-x-3 sm:gap-y-1 sm:text-xs">
           {property.bhk && (
             <span className="flex items-center gap-1">
-              <BedDouble size={13} /> {property.bhk} BHK
+              <BedDouble size={10} className="sm:h-[13px] sm:w-[13px]" /> {property.bhk} BHK
             </span>
           )}
           {property.areaSqft && (
-            <span className="flex items-center gap-1">
+            <span className="hidden items-center gap-1 sm:flex">
               <Ruler size={13} /> {property.areaSqft} sq.ft
             </span>
           )}
-          <span>{FURNISHING_LABEL[property.furnishing]}</span>
+          <span className="hidden sm:inline">{FURNISHING_LABEL[property.furnishing]}</span>
         </div>
 
-        <div className="mt-auto flex items-center justify-between pt-3 border-t border-line/70 text-xs">
-          <span className="text-ink-soft">
+        <div className="mt-auto hidden items-center justify-between border-t border-line/70 pt-3 text-xs sm:flex">
+          <span className="truncate text-ink-soft">
             Available {formatDate(property.availableFrom)}
             {isRecentlyApproved && <span className="ml-2 font-medium text-primary">Approved just now</span>}
           </span>
@@ -123,8 +122,8 @@ function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay
           )}
         </div>
       </Link>
-      <div className="flex flex-col gap-2 px-4 pb-4 sm:flex-row">
-        <Link to={`/property/${property.slug}`} className="w-full rounded-full border border-line py-2 text-center text-xs font-semibold text-ink sm:flex-1">
+      <div className="flex flex-col gap-1 px-2 pb-2 sm:gap-2 sm:px-3 sm:pb-3 lg:px-4 lg:pb-4 lg:flex-row">
+        <Link to={`/property/${property.slug}`} className="w-full truncate rounded-full border border-line px-1 py-1.5 text-center text-[9px] font-semibold text-ink sm:flex-1 sm:py-2 sm:text-xs">
           View details
         </Link>
         {onSelect && (
@@ -132,15 +131,15 @@ function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay
             type="button"
             onClick={() => onSelect(property)}
             aria-pressed={selected}
-            className={`flex w-full items-center justify-center gap-1 rounded-full px-3 py-2 text-xs font-semibold sm:w-auto ${selected ? "bg-primary-soft text-primary" : "bg-primary text-white"}`}
+            className={`flex w-full items-center justify-center gap-1 rounded-full px-1 py-1.5 text-[9px] font-semibold sm:w-auto sm:px-3 sm:py-2 sm:text-xs ${selected ? "bg-primary-soft text-primary" : "bg-primary text-white"}`}
           >
             {selected && <Check size={13} />}
             {selected ? "Selected" : selectLabel}
           </button>
         )}
         {onChat && (
-          <button type="button" onClick={() => onChat(property)} className="flex w-full items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-white sm:w-auto">
-            <MessageCircle size={13} /> Chat
+          <button type="button" onClick={() => onChat(property)} className="flex w-full items-center justify-center gap-1 rounded-full bg-primary px-1 py-1.5 text-[9px] font-semibold text-white sm:w-auto sm:px-3 sm:py-2 sm:text-xs">
+            <MessageCircle size={11} className="sm:h-[13px] sm:w-[13px]" /> Chat
           </button>
         )}
       </div>

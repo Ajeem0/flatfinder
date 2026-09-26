@@ -135,7 +135,7 @@ export default function Home() {
         ) : featured.length === 0 ? (
           <p className="text-sm text-ink-soft" data-reveal>No listings yet — check back soon, or be the first to post one.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 grid-cols-3 gap-2 sm:gap-3 lg:gap-5">
             {featured.map((p, index) => (
               <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} revealDelay={index * 80} />
             ))}

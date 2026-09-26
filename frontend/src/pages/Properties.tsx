@@ -200,7 +200,7 @@ export default function Properties() {
             />
           ) : (
             <>
-              <div className={view === "grid" ? "grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
+              <div className={view === "grid" ? "grid min-w-0 grid-cols-3 gap-2 sm:gap-3 lg:gap-5" : "flex flex-col gap-4"}>
                 {results.map((p, index) => (
                   <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} revealDelay={index * 60} imagePriority={index === 0} />
                 ))}

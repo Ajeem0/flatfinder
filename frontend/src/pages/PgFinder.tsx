@@ -36,7 +36,7 @@ export default function PgFinder() {
       ) : results.length === 0 ? (
         <EmptyState title="No PG listings right now" description="Check back soon — new PGs are added regularly." />
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-w-0 grid-cols-3 gap-2 sm:gap-3 lg:gap-5">
           {results.map((p) => (
             <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} />
           ))}

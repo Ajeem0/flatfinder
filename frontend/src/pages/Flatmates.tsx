@@ -100,7 +100,7 @@ export default function Flatmates() {
       ) : (
         <>
           <p className="mb-4 text-sm text-ink-soft">{results.length} {results.length === 1 ? "property" : "properties"} available to flatmate</p>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 grid-cols-3 gap-2 sm:gap-3 lg:gap-5">
             {results.map((p) => (
               <PropertyCard
                 key={p.id}
