@@ -47,12 +47,13 @@ const propertyListSelect = {
   status: true,
   createdAt: true,
   updatedAt: true,
-  images: { select: { thumbnailUrl: true, url: true }, orderBy: { sortOrder: "asc" }, take: 1 },
+  images: { select: { thumbnailUrl: true, cardUrl: true, mediumUrl: true, largeUrl: true, width: true, height: true, blurDataUrl: true }, orderBy: { sortOrder: "asc" }, take: 1 },
   owner: { select: { userType: true, isPhoneVerified: true } },
   location: { select: { name: true, city: { select: { name: true } } } },
 };
 
 function serializePropertyCard(p, isFavorited = false) {
+  const image = p.images[0];
   return {
     id: p.id,
     slug: p.slug,
@@ -72,6 +73,7 @@ function serializePropertyCard(p, isFavorited = false) {
     city: p.location?.city?.name || null,
     locationName: p.location?.name || null,
     images: p.images.map((image) => image.thumbnailUrl || image.url),
+    imageVariants: image ? [{ thumbnailUrl: image.thumbnailUrl, cardUrl: image.cardUrl, mediumUrl: image.mediumUrl, largeUrl: image.largeUrl, width: image.width, height: image.height, blurDataUrl: image.blurDataUrl }] : [],
     owner: p.owner ? { userType: p.owner.userType, isPhoneVerified: p.owner.isPhoneVerified } : null,
     isFavorited,
     createdAt: p.createdAt,
@@ -112,6 +114,7 @@ function serializeProperty(p, favoritedIds = new Set()) {
     locationName: p.location?.name || null,
     videoUrl: p.videoUrl || null,
     images: p.images.map((i) => i.url),
+    imageVariants: p.images.map((i) => ({ thumbnailUrl: i.thumbnailUrl, cardUrl: i.cardUrl, mediumUrl: i.mediumUrl, largeUrl: i.largeUrl, width: i.width, height: i.height, blurDataUrl: i.blurDataUrl })),
     amenities: (p.amenities || []).map((a) => a.amenity.name),
     owner: p.owner
       ? {
@@ -267,7 +270,10 @@ router.get("/", optionalAuth, async (req, res, next) => {
     const cacheKey = !req.user ? propertyListCacheKey(req.query) : null;
     if (cacheKey) {
       const cached = await getCachedPropertyList(cacheKey);
-      if (cached) return res.json(cached);
+      if (cached) {
+        res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+        return res.json(cached);
+      }
     }
 
     const [total, properties] = await Promise.all([
@@ -296,6 +302,7 @@ router.get("/", optionalAuth, async (req, res, next) => {
       parsedQuery: q ? smart : undefined,
     };
     if (cacheKey) await cachePropertyList(cacheKey, response);
+    if (cacheKey) res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
     res.json(response);
   } catch (err) {
     next(err);

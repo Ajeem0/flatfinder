@@ -106,7 +106,7 @@ export default function Properties() {
     setFilters((f) => ({ ...f, ...patch }));
   }
 
-  async function toggleFavorite(id: string) {
+  const toggleFavorite = useCallback(async (id: string) => {
     if (!user) {
       notify("Log in to save properties to your favorites.", "info");
       return;
@@ -119,7 +119,7 @@ export default function Properties() {
     } catch {
       notify("Couldn't update favorites right now.", "error");
     }
-  }
+  }, [notify, user]);
 
   const heading = useMemo(() => {
     if (q) return `Results for "${q}"`;
@@ -202,7 +202,7 @@ export default function Properties() {
             <>
               <div className={view === "grid" ? "grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
                 {results.map((p, index) => (
-                  <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} revealDelay={index * 60} imagePriority={index < 3} />
+                  <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} revealDelay={index * 60} imagePriority={index === 0} />
                 ))}
               </div>
 

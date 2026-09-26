@@ -1,3 +1,4 @@
+import { memo, useState } from "react";
 import { Heart, MapPin, BedDouble, Ruler, BadgeCheck, MessageCircle, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Property } from "../types";
@@ -15,10 +16,19 @@ interface Props {
   imagePriority?: boolean;
 }
 
-export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat, onSelect, selectLabel = "Select property", selected = false, imagePriority = false }: Props) {
+function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat, onSelect, selectLabel = "Select property", selected = false, imagePriority = false }: Props) {
   const cover = property.images[0];
+  const variant = property.imageVariants?.[0];
+  const src = variant?.cardUrl || variant?.mediumUrl || cover;
+  const srcSet = [
+    variant?.thumbnailUrl && `${variant.thumbnailUrl} 320w`,
+    variant?.cardUrl && `${variant.cardUrl} 640w`,
+    variant?.mediumUrl && `${variant.mediumUrl} 1024w`,
+    variant?.largeUrl && `${variant.largeUrl} 1600w`,
+  ].filter(Boolean).join(", ");
+  const [renderedAt] = useState(() => Date.now());
   const isRecentlyApproved =
-    property.status === "PUBLISHED" && Date.now() - new Date(property.updatedAt).getTime() < 1000 * 60;
+    property.status === "PUBLISHED" && renderedAt - new Date(property.updatedAt).getTime() < 1000 * 60;
 
   return (
     <div
@@ -30,12 +40,16 @@ export default function PropertyCard({ property, onToggleFavorite, favoritePendi
         <div className="relative aspect-[4/3] overflow-hidden bg-primary-soft">
           {cover ? (
             <img
-              src={cover}
+              src={src}
+              srcSet={srcSet || undefined}
               alt={property.title}
               loading={imagePriority ? "eager" : "lazy"}
               fetchPriority={imagePriority ? "high" : "auto"}
               decoding="async"
+              width={variant?.width || 4}
+              height={variant?.height || 3}
               sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 100vw"
+              style={variant?.blurDataUrl ? { backgroundImage: `url(${variant.blurDataUrl})`, backgroundSize: "cover" } : undefined}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
@@ -133,3 +147,5 @@ export default function PropertyCard({ property, onToggleFavorite, favoritePendi
     </div>
   );
 }
+
+export default memo(PropertyCard);

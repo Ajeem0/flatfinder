@@ -107,3 +107,7 @@ GET    /api/locations
   from `.env.example` in their dashboard, add a Postgres add-on, and set the
   build command to `npm install && npx prisma generate && npx prisma migrate deploy`.
 - Update `CORS_ORIGIN` to your deployed frontend URL once you have one.
+- Set `PUBLIC_MEDIA_URL` to the public API or CDN origin in production (for
+  example `https://api.example.com`), so optimized `/media/...` image URLs do
+  not resolve against the frontend host. The content-addressed WebP files can
+  be placed behind object storage/CDN later without changing database URLs.

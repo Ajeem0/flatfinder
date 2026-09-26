@@ -27,6 +27,16 @@ export interface PropertyOwner {
   phone?: string | null;
 }
 
+export interface PropertyImageVariant {
+  thumbnailUrl?: string | null;
+  cardUrl?: string | null;
+  mediumUrl?: string | null;
+  largeUrl?: string | null;
+  width?: number | null;
+  height?: number | null;
+  blurDataUrl?: string | null;
+}
+
 export interface Property {
   id: string;
   slug: string;
@@ -59,6 +69,7 @@ export interface Property {
   locationName: string | null;
   videoUrl: string | null;
   images: string[];
+  imageVariants?: PropertyImageVariant[];
   amenities: string[];
   owner: PropertyOwner | null;
   isFavorited: boolean;

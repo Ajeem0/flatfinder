@@ -152,7 +152,23 @@ export default function PropertyDetail() {
   }
 
   const images = property.images.length ? property.images : [];
+  const imageVariants = property.imageVariants ?? [];
   const videoEmbedUrl = getVideoEmbedUrl(property.videoUrl);
+
+  function imageUrl(index: number, size: "thumbnail" | "card" | "medium" | "large") {
+    const variant = imageVariants[index];
+    return variant?.[`${size}Url`] || images[index];
+  }
+
+  function imageSrcSet(index: number) {
+    const variant = imageVariants[index];
+    return [
+      variant?.thumbnailUrl && `${variant.thumbnailUrl} 320w`,
+      variant?.cardUrl && `${variant.cardUrl} 640w`,
+      variant?.mediumUrl && `${variant.mediumUrl} 1024w`,
+      variant?.largeUrl && `${variant.largeUrl} 1600w`,
+    ].filter(Boolean).join(", ");
+  }
 
   function selectImage(index: number) {
     const nextIndex = Math.max(0, Math.min(images.length - 1, index));
@@ -219,7 +235,18 @@ export default function PropertyDetail() {
                 key={`${image}-${index}`}
                 className="relative min-w-full max-w-full snap-center shrink-0 bg-ink"
               >
-                <img src={image} alt={`${property.title} photo ${index + 1}`} loading={index < 2 ? "eager" : "lazy"} className="h-full w-full object-cover" />
+                <img
+                  src={imageUrl(index, "large")}
+                  srcSet={imageSrcSet(index) || undefined}
+                  sizes="(max-width: 640px) 100vw, 960px"
+                  alt={`${property.title} photo ${index + 1}`}
+                  loading={index === activeImage ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  decoding="async"
+                  width={imageVariants[index]?.width || 16}
+                  height={imageVariants[index]?.height || 9}
+                  className="h-full w-full object-cover"
+                />
               </div>
             ))}
           </div>
@@ -250,7 +277,15 @@ export default function PropertyDetail() {
               aria-label={`Select property photo ${index + 1}`}
               className={`h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition-opacity sm:h-20 sm:w-28 ${index === activeImage ? "border-primary" : "border-transparent opacity-65 hover:opacity-100"}`}
             >
-              <img src={image} alt="" className="h-full w-full object-cover" />
+              <img
+                src={imageUrl(index, "thumbnail")}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                width={96}
+                height={64}
+                className="h-full w-full object-cover"
+              />
             </button>
           ))}
         </div>
@@ -455,7 +490,14 @@ export default function PropertyDetail() {
               else showPreviousImage();
             }}
           >
-            <img src={images[activeImage]} alt={`${property.title} photo ${activeImage + 1}`} className="h-full w-full rounded-lg object-contain" />
+            <img
+              src={imageUrl(activeImage, "large")}
+              srcSet={imageSrcSet(activeImage) || undefined}
+              sizes="100vw"
+              alt={`${property.title} photo ${activeImage + 1}`}
+              decoding="async"
+              className="h-full w-full rounded-lg object-contain"
+            />
             {images.length > 1 && (
               <>
                 <button type="button" onClick={showPreviousImage} aria-label="Previous property photo" className="absolute left-0 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur sm:left-4">

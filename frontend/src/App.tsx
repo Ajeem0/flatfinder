@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Home as HomeIcon } from "lucide-react";
 import { AuthProvider } from "./context/AuthContext";
@@ -7,19 +7,19 @@ import Layout from "./components/Layout";
 
 import Home from "./pages/Home";
 import Properties from "./pages/Properties";
-import PropertyDetail from "./pages/PropertyDetail";
-import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import Signup from "./pages/Signup";
-import Favorites from "./pages/Favorites";
-import Dashboard from "./pages/Dashboard";
-import PostProperty from "./pages/PostProperty";
-import AdminListings from "./pages/AdminListings";
-import AdminPropertyEdit from "./pages/AdminPropertyEdit";
-import PgFinder from "./pages/PgFinder";
-import Flatmates from "./pages/Flatmates";
-import NotFound from "./pages/NotFound";
-import Messages from "./pages/Messages";
+const PropertyDetail = lazy(() => import("./pages/PropertyDetail"));
+const Login = lazy(() => import("./pages/Login"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Favorites = lazy(() => import("./pages/Favorites"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const PostProperty = lazy(() => import("./pages/PostProperty"));
+const AdminListings = lazy(() => import("./pages/AdminListings"));
+const AdminPropertyEdit = lazy(() => import("./pages/AdminPropertyEdit"));
+const PgFinder = lazy(() => import("./pages/PgFinder"));
+const Flatmates = lazy(() => import("./pages/Flatmates"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Messages = lazy(() => import("./pages/Messages"));
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function AppShell() {
@@ -42,7 +42,8 @@ function AppShell() {
       </div>
 
       <Layout>
-        <Routes>
+        <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-8"><div className="h-64 animate-pulse rounded-2xl bg-line/50" /></div>}>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/property/:slug" element={<PropertyDetail />} />
@@ -79,7 +80,8 @@ function AppShell() {
           />
           <Route path="/post-property" element={<ProtectedRoute roles={["OWNER", "AGENT", "ADMIN"]}><PostProperty /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
-        </Routes>
+          </Routes>
+        </Suspense>
       </Layout>
     </>
   );

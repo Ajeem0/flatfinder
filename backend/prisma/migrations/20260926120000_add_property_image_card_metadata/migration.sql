@@ -1,0 +1,5 @@
+ALTER TABLE "PropertyImage"
+ADD COLUMN "cardUrl" TEXT,
+ADD COLUMN "width" INTEGER,
+ADD COLUMN "height" INTEGER,
+ADD COLUMN "blurDataUrl" TEXT;

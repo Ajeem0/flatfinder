@@ -231,8 +231,12 @@ model PropertyImage {
   propertyId String
   url        String
   thumbnailUrl String?
+  cardUrl    String?
   mediumUrl   String?
   largeUrl    String?
+  width      Int?
+  height     Int?
+  blurDataUrl String?
   sortOrder  Int      @default(0)
 }
 
