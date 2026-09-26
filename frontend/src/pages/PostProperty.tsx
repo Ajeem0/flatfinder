@@ -260,9 +260,8 @@ function PostPropertyForm() {
         {STEPS.map((label, i) => (
           <div key={label} className="flex shrink-0 items-center gap-1.5">
             <div
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                i < step ? "bg-verified text-white" : i === step ? "bg-primary text-white" : "bg-line text-ink-soft"
-              }`}
+              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${i < step ? "bg-verified text-white" : i === step ? "bg-primary text-white" : "bg-line text-ink-soft"
+                }`}
             >
               {i < step ? <Check size={14} /> : i + 1}
             </div>
@@ -281,9 +280,8 @@ function PostPropertyForm() {
                 <button
                   key={t}
                   onClick={() => update({ propertyType: t })}
-                  className={`min-h-[48px] rounded-xl border px-3 py-3 text-sm font-medium capitalize ${
-                    form.propertyType === t ? "border-primary bg-primary-soft text-primary" : "border-line text-ink"
-                  }`}
+                  className={`min-h-[48px] rounded-xl border px-3 py-3 text-sm font-medium capitalize ${form.propertyType === t ? "border-primary bg-primary-soft text-primary" : "border-line text-ink"
+                    }`}
                 >
                   {t.replace("_", " ").toLowerCase()}
                 </button>

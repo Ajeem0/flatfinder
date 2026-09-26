@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { inputClass, Field } from "./Login";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import PasswordInput from "../components/PasswordInput";
 
 const USER_TYPES = [
   { value: "TENANT", label: "Tenant" },
@@ -114,14 +115,13 @@ export default function Signup() {
           <input id="phone" type="tel" autoComplete="tel" value={form.phone} onChange={updateField("phone")} className={inputClass} placeholder="98765xxxxx" />
         </Field>
         <Field label="Password" htmlFor="signup-password">
-          <input
+          <PasswordInput
             id="signup-password"
-            type="password"
             autoComplete="new-password"
             required
             value={form.password}
             onChange={updateField("password")}
-            className={inputClass}
+            inputClassName={inputClass}
             placeholder="At least 6 characters"
           />
         </Field>

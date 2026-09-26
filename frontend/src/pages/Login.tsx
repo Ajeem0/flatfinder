@@ -4,6 +4,7 @@ import { ApiError } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import PasswordInput from "../components/PasswordInput";
 
 const GOOGLE_USER_TYPES = [
   { value: "TENANT", label: "Tenant" },
@@ -83,14 +84,13 @@ export default function Login() {
         </Field>
 
         <Field label="Password" htmlFor="password">
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             required
             value={form.password}
             onChange={updateField("password")}
-            className={inputClass}
+            inputClassName={inputClass}
             placeholder="••••••••"
           />
         </Field>

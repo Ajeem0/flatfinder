@@ -7,6 +7,7 @@ import type { Enquiry, FavoriteItem, Property, Visit } from "../types";
 import { formatDate, formatRent } from "../lib/format";
 import { EmptyState } from "../components/States";
 import { useToast } from "../context/ToastContext";
+import PasswordInput from "../components/PasswordInput";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -96,9 +97,9 @@ function AdminProfile() {
       <div className="mt-6 border-t border-line pt-5">
         <h3 className="font-display text-base font-semibold text-ink">Change admin password</h3>
         <div className="mt-3 grid max-w-md gap-3">
-          <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Current password" autoComplete="current-password" className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
-          <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="New password (6+ characters)" autoComplete="new-password" className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
-          <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Confirm new password" autoComplete="new-password" className="w-full min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <PasswordInput value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Current password" autoComplete="current-password" inputClassName="min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <PasswordInput value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="New password (6+ characters)" autoComplete="new-password" inputClassName="min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <PasswordInput value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Confirm new password" autoComplete="new-password" inputClassName="min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-primary" />
           <button onClick={savePassword} disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword} className="w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary disabled:opacity-50 sm:w-fit">
             {savingPassword ? "Updating..." : "Update password"}
           </button>
