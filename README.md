@@ -36,10 +36,8 @@ npm install
 npm run dev                 # http://localhost:5173
 ```
 
-Open `http://localhost:5173`. Log in with the seeded admin account
-(password `password123`):
 
-- Admin: `admin@flatfinder.in`
+
 
 ## What's real vs. what's stubbed
 
