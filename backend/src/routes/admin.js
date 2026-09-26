@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../config/db");
 const { requireAuth, requireUserType } = require("../middleware/auth");
+const { clearPropertyListCache } = require("../utils/propertyCache");
 
 const router = express.Router();
 
@@ -124,6 +125,7 @@ router.get("/properties/all", requireAuth, requireUserType("ADMIN"), async (req,
 router.post("/properties/:id/approve", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
   try {
     const property = await prisma.property.update({ where: { id: req.params.id }, data: { status: "PUBLISHED" } });
+    await clearPropertyListCache();
     res.json({ property });
   } catch (err) {
     next(err);
@@ -134,6 +136,7 @@ router.post("/properties/:id/approve", requireAuth, requireUserType("ADMIN"), as
 router.post("/properties/:id/reject", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
   try {
     const property = await prisma.property.update({ where: { id: req.params.id }, data: { status: "REJECTED" } });
+    await clearPropertyListCache();
     res.json({ property });
   } catch (err) {
     next(err);

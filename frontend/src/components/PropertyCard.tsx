@@ -12,9 +12,10 @@ interface Props {
   onSelect?: (property: Property) => void;
   selectLabel?: string;
   selected?: boolean;
+  imagePriority?: boolean;
 }
 
-export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat, onSelect, selectLabel = "Select property", selected = false }: Props) {
+export default function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay = 0, onChat, onSelect, selectLabel = "Select property", selected = false, imagePriority = false }: Props) {
   const cover = property.images[0];
   const isRecentlyApproved =
     property.status === "PUBLISHED" && Date.now() - new Date(property.updatedAt).getTime() < 1000 * 60;
@@ -31,7 +32,10 @@ export default function PropertyCard({ property, onToggleFavorite, favoritePendi
             <img
               src={cover}
               alt={property.title}
-              loading="lazy"
+              loading={imagePriority ? "eager" : "lazy"}
+              fetchPriority={imagePriority ? "high" : "auto"}
+              decoding="async"
+              sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 100vw"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (

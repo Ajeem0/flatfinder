@@ -4,6 +4,13 @@ const prisma = require("../config/db");
 const { requireAuth, optionalAuth, requireUserType } = require("../middleware/auth");
 const { uniqueSlug } = require("../utils/slug");
 const { parseSmartQuery } = require("../utils/smartSearch");
+const {
+  cachePropertyList,
+  clearPropertyListCache,
+  getCachedPropertyList,
+  propertyListCacheKey,
+} = require("../utils/propertyCache");
+const { optimizePropertyImages } = require("../utils/propertyImages");
 
 const router = express.Router();
 
@@ -22,11 +29,55 @@ const propertyInclude = {
   location: { include: { city: true } },
 };
 
-const propertyListInclude = {
-  images: { orderBy: { sortOrder: "asc" }, take: 1 },
-  owner: { select: { id: true, name: true, userType: true, profilePhotoUrl: true, isPhoneVerified: true } },
-  location: { include: { city: true } },
+const propertyListSelect = {
+  id: true,
+  slug: true,
+  title: true,
+  propertyType: true,
+  bhk: true,
+  areaSqft: true,
+  furnishing: true,
+  monthlyRent: true,
+  noBrokerage: true,
+  bachelorFriendly: true,
+  familyFriendly: true,
+  girlsFriendly: true,
+  petFriendly: true,
+  availableFrom: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+  images: { select: { thumbnailUrl: true, url: true }, orderBy: { sortOrder: "asc" }, take: 1 },
+  owner: { select: { userType: true, isPhoneVerified: true } },
+  location: { select: { name: true, city: { select: { name: true } } } },
 };
+
+function serializePropertyCard(p, isFavorited = false) {
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    propertyType: p.propertyType,
+    bhk: p.bhk,
+    areaSqft: p.areaSqft,
+    furnishing: p.furnishing,
+    monthlyRent: p.monthlyRent,
+    noBrokerage: p.noBrokerage,
+    bachelorFriendly: p.bachelorFriendly,
+    familyFriendly: p.familyFriendly,
+    girlsFriendly: p.girlsFriendly,
+    petFriendly: p.petFriendly,
+    availableFrom: p.availableFrom,
+    status: p.status,
+    city: p.location?.city?.name || null,
+    locationName: p.location?.name || null,
+    images: p.images.map((image) => image.thumbnailUrl || image.url),
+    owner: p.owner ? { userType: p.owner.userType, isPhoneVerified: p.owner.isPhoneVerified } : null,
+    isFavorited,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  };
+}
 
 function serializeProperty(p, favoritedIds = new Set()) {
   return {
@@ -209,13 +260,19 @@ router.get("/", optionalAuth, async (req, res, next) => {
     const isGuest = !req.user;
     const requestedPage = Math.max(parseInt(page, 10) || 1, 1);
     const requestedTake = Math.min(parseInt(pageSize, 10) || 12, 50);
-    const take = isGuest ? 3 : requestedTake;
-    const effectivePage = isGuest ? 1 : requestedPage;
+    const take = requestedTake;
+    const effectivePage = requestedPage;
     const skip = (effectivePage - 1) * take;
+
+    const cacheKey = !req.user ? propertyListCacheKey(req.query) : null;
+    if (cacheKey) {
+      const cached = await getCachedPropertyList(cacheKey);
+      if (cached) return res.json(cached);
+    }
 
     const [total, properties] = await Promise.all([
       prisma.property.count({ where }),
-      prisma.property.findMany({ where, include: propertyListInclude, orderBy, take, skip }),
+      prisma.property.findMany({ where, select: propertyListSelect, orderBy, take, skip }),
     ]);
 
     let favoritedIds = new Set();
@@ -227,17 +284,19 @@ router.get("/", optionalAuth, async (req, res, next) => {
       favoritedIds = new Set(favs.map((f) => f.propertyId));
     }
 
-    res.json({
-      results: properties.map((p) => serializeProperty(p, favoritedIds)),
+    const response = {
+      results: properties.map((p) => serializePropertyCard(p, favoritedIds.has(p.id))),
       pagination: {
         page: effectivePage,
         pageSize: take,
-        total: isGuest ? Math.min(total, 3) : total,
-        totalPages: isGuest ? 1 : Math.ceil(total / take),
+        total,
+        totalPages: Math.ceil(total / take),
       },
-      hasMore: isGuest ? total > 3 : false,
+      hasMore: effectivePage < Math.ceil(total / take),
       parsedQuery: q ? smart : undefined,
-    });
+    };
+    if (cacheKey) await cachePropertyList(cacheKey, response);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -289,6 +348,7 @@ router.post(
         )
       );
 
+      const optimizedImages = await optimizePropertyImages(images);
       const property = await prisma.property.create({
         data: {
           slug,
@@ -331,12 +391,15 @@ router.post(
           locationId: location.id,
           // New listings need admin approval before they go live (see spec section 18).
           status: "PENDING",
-          images: { create: images.map((url, i) => ({ url, sortOrder: i })) },
+          images: {
+            create: optimizedImages.map((image, i) => ({ ...image, sortOrder: i })),
+          },
           amenities: { create: amenityRecords.map((a) => ({ amenityId: a.id })) },
         },
         include: propertyInclude,
       });
 
+      await clearPropertyListCache();
       res.status(201).json({ property: serializeProperty(property) });
     } catch (err) {
       next(err);
@@ -450,7 +513,8 @@ router.put("/:id", requireAuth, async (req, res, next) => {
 
     if (Array.isArray(images)) {
       await prisma.propertyImage.deleteMany({ where: { propertyId: existing.id } });
-      data.images = { create: images.map((url, i) => ({ url, sortOrder: i })) };
+      const optimizedImages = await optimizePropertyImages(images);
+      data.images = { create: optimizedImages.map((image, i) => ({ ...image, sortOrder: i })) };
     }
 
     if (Array.isArray(amenities)) {
@@ -466,6 +530,7 @@ router.put("/:id", requireAuth, async (req, res, next) => {
       data,
       include: propertyInclude,
     });
+    await clearPropertyListCache();
     res.json({ property: serializeProperty(property) });
   } catch (err) {
     next(err);
@@ -481,6 +546,7 @@ router.delete("/:id", requireAuth, async (req, res, next) => {
       return res.status(403).json({ error: "You can only delete your own listings" });
     }
     await prisma.property.delete({ where: { id: existing.id } });
+    await clearPropertyListCache();
     res.status(204).send();
   } catch (err) {
     next(err);

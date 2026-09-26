@@ -26,7 +26,7 @@ function AppShell() {
   const [isBooting, setIsBooting] = useState(true);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setIsBooting(false), 3000);
+    const timer = window.setTimeout(() => setIsBooting(false), 250);
     return () => window.clearTimeout(timer);
   }, []);
 

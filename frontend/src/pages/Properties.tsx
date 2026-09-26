@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { SlidersHorizontal, LayoutGrid, List, X } from "lucide-react";
 import PropertyCard from "../components/PropertyCard";
 import FilterSidebar, { ActiveFilterPills, EMPTY_FILTERS, type FilterState } from "../components/FilterSidebar";
@@ -48,7 +48,7 @@ function buildParams(filters: FilterState, sort: string, page: number, q: string
   );
   params.set("sort", sort);
   params.set("page", String(page));
-  params.set("pageSize", "9");
+  params.set("pageSize", "12");
   return params;
 }
 
@@ -66,13 +66,10 @@ export default function Properties() {
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const { notify } = useToast();
-  const location = useLocation();
-  const [hasMore, setHasMore] = useState(false);
 
   const fetchResults = useCallback(async () => {
-    if (authLoading) return;
     setResults(null);
     setError(null);
     try {
@@ -81,13 +78,12 @@ export default function Properties() {
       setResults(res.results);
       setTotal(res.pagination.total);
       setTotalPages(res.pagination.totalPages || 1);
-      setHasMore(Boolean(res.hasMore));
     } catch (err) {
       setResults([]);
       setError(err instanceof ApiError ? err.message : "Something went wrong loading properties.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoading, filters, sort, page, q, user?.id]);
+  }, [filters, sort, page, q, user?.id]);
 
   // Debounced fetch so typing in the city/budget fields doesn't spam the API.
   useEffect(() => {
@@ -206,36 +202,11 @@ export default function Properties() {
             <>
               <div className={view === "grid" ? "grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
                 {results.map((p, index) => (
-                  <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} revealDelay={index * 60} />
+                  <PropertyCard key={p.id} property={p} onToggleFavorite={toggleFavorite} revealDelay={index * 60} imagePriority={index < 3} />
                 ))}
               </div>
 
-              {!user && hasMore && results.length === 3 && (
-                <div className="relative mt-8 overflow-hidden rounded-2xl border border-line bg-primary-soft" data-reveal>
-                  <div aria-hidden="true" className="grid grid-cols-1 gap-5 p-5 opacity-55 blur-md sm:grid-cols-2 xl:grid-cols-3">
-                    {[1, 2, 3].map((placeholder) => (
-                      <div key={placeholder} className="h-52 rounded-2xl border border-line bg-white p-4">
-                        <div className="h-28 rounded-xl bg-line/70" />
-                        <div className="mt-4 h-4 w-3/4 rounded-full bg-line/70" />
-                        <div className="mt-3 h-3 w-1/2 rounded-full bg-line/60" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 px-4 text-center backdrop-blur-sm">
-                    <h2 className="font-display text-lg font-semibold text-ink">Login first to view more flats</h2>
-                    <p className="mt-1 text-sm text-ink-soft">Sign in to see all available listings.</p>
-                    <Link
-                      to="/login"
-                      state={{ from: { pathname: location.pathname, search: location.search } }}
-                      className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-light"
-                    >
-                      Login / Sign In
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {user && totalPages > 1 && (
+              {totalPages > 1 && (
                 <div className="mt-8 flex items-center justify-center gap-2">
                   <button
                     disabled={page <= 1}
