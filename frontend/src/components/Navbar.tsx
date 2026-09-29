@@ -34,10 +34,17 @@ export default function Navbar() {
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-3 py-3 sm:px-6">
-          <Link to="/" className="logo-mark flex items-center gap-2 shrink-0 transition-transform duration-200 hover:scale-[1.01]">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white font-display font-bold shadow-[0_8px_18px_rgba(55,48,165,0.25)]">F</span>
-            <span className="font-display text-lg font-semibold tracking-tight text-ink">FlatFinder</span>
-          </Link>
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <Link to="/" className="logo-mark flex items-center gap-2 shrink-0 transition-transform duration-200 hover:scale-[1.01]">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white font-display font-bold shadow-[0_8px_18px_rgba(55,48,165,0.25)]">F</span>
+              <span className="font-display text-lg font-semibold tracking-tight text-ink">FlatFinder</span>
+            </Link>
+            <span className="h-8 w-px bg-line" aria-hidden="true" />
+            <div className="flex items-center gap-2" aria-label="In collaboration with SKIT College Jaipur">
+              <img src="/skit-logo.png" alt="SKIT College Jaipur" className="h-8 w-auto object-contain" />
+              <span className="hidden text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-ink-soft sm:block">In collaboration<br />with SKIT Jaipur</span>
+            </div>
+          </div>
 
           <nav className="hidden lg:flex items-center gap-6">
             {navLinks.filter((link) => canPostProperty || link.to !== "/post-property").map((l) => (

@@ -9,6 +9,10 @@ export default function Footer() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-white font-display font-bold text-sm">F</span>
             <span className="font-display text-base font-semibold text-ink">FlatFinder</span>
           </Link>
+          <div className="mb-4 flex items-center gap-2" aria-label="In collaboration with SKIT College Jaipur">
+            <img src="/skit-logo.png" alt="SKIT College Jaipur" className="h-10 w-auto object-contain" />
+            <span className="text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] text-ink-soft">In collaboration<br />with SKIT Jaipur</span>
+          </div>
           <p className="text-sm text-ink-soft">Find a place you'll love to live — across every major Indian city.</p>
         </div>
         <div>

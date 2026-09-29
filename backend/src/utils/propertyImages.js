@@ -62,4 +62,4 @@ async function optimizePropertyImages(images = []) {
   return Promise.all(images.map((image) => optimizePropertyImage(image)));
 }
 
-module.exports = { optimizePropertyImages };
+module.exports = { optimizePropertyImage, optimizePropertyImages };

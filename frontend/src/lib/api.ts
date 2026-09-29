@@ -17,6 +17,7 @@ const PROPERTY_SEARCH_CACHE_TTL = 60_000;
 
 type CachedPropertySearch = { data: PropertySearchResponse; cachedAt: number };
 const propertySearchCache = new Map<string, CachedPropertySearch>();
+const pendingRequests = new Map<string, Promise<unknown>>();
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -45,13 +46,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (token) headers.Authorization = `Bearer ${token}`;
 
   let res: Response;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 12_000);
   try {
-    res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
-  } catch {
+    res = await fetch(`${BASE_URL}${path}`, { ...options, headers, signal: options.signal || controller.signal });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError("The FlatFinder API took too long to respond. Please try again.", 408);
+    }
     throw new ApiError(
       "Can't reach the FlatFinder API. Is the backend running on " + BASE_URL + "?",
       0
     );
+  } finally {
+    window.clearTimeout(timeout);
   }
 
   if (res.status === 204) return undefined as T;
@@ -82,8 +90,16 @@ async function cachedPropertySearch(params: URLSearchParams, cacheKey: string) {
   } catch {
   }
 
-  const data = await request<PropertySearchResponse>(`/properties?${params.toString()}`);
-  const value = { data, cachedAt: now };
+  const requestKey = `${BASE_URL}/properties?${params.toString()}`;
+  const pending = pendingRequests.get(requestKey) as Promise<PropertySearchResponse> | undefined;
+  const data = pending || request<PropertySearchResponse>(requestKey.replace(BASE_URL, ""));
+  if (!pending) pendingRequests.set(requestKey, data);
+  try {
+    await data;
+  } finally {
+    pendingRequests.delete(requestKey);
+  }
+  const value = { data: await data, cachedAt: now };
   propertySearchCache.set(key, value);
   try {
     sessionStorage.setItem(`${PROPERTY_SEARCH_CACHE_PREFIX}${key}`, JSON.stringify(value));
