@@ -6,7 +6,6 @@ export interface User {
   email: string;
   phone?: string | null;
   adminPhone?: string | null;
-  isPhoneVerified: boolean;
   userType: UserType;
   profilePhotoUrl?: string | null;
   preferredLocation?: string | null;
@@ -23,7 +22,6 @@ export interface PropertyOwner {
   name: string;
   userType: UserType;
   profilePhotoUrl?: string | null;
-  isPhoneVerified: boolean;
   phone?: string | null;
 }
 

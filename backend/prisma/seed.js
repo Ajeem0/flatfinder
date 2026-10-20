@@ -63,7 +63,7 @@ async function main() {
   const admin = await prisma.user.upsert({
     where: { email: "admin@flatfinder.in" },
     update: {},
-    create: { name: "FlatFinder Admin", email: "admin@flatfinder.in", passwordHash, userType: "ADMIN", isPhoneVerified: true },
+    create: { name: "FlatFinder Admin", email: "admin@flatfinder.in", passwordHash, userType: "ADMIN" },
   });
 
   const owners = [];
@@ -77,7 +77,6 @@ async function main() {
         phone: `98765${String(10000 + i)}`,
         passwordHash,
         userType: i % 4 === 0 ? "AGENT" : "OWNER",
-        isPhoneVerified: true,
       },
     });
     owners.push(owner);

@@ -43,7 +43,6 @@ router.get("/users", requireAuth, requireUserType("ADMIN"), async (req, res, nex
         adminPhone: true,
         userType: true,
         profilePhotoUrl: true,
-        isPhoneVerified: true,
         preferredLocation: true,
         budgetMin: true,
         budgetMax: true,
@@ -68,25 +67,6 @@ router.put("/users/:id/phone", requireAuth, requireUserType("ADMIN"), async (req
       where: { id: req.params.id },
       data: { phone: phone || null },
       select: { id: true, name: true, email: true, phone: true, userType: true },
-    });
-    res.json({ user });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// POST /api/admin/users/:id/verify -- verify an owner with a saved phone number
-router.post("/users/:id/verify", requireAuth, requireUserType("ADMIN"), async (req, res, next) => {
-  try {
-    const existing = await prisma.user.findUnique({ where: { id: req.params.id } });
-    if (!existing) return res.status(404).json({ error: "User not found" });
-    if (existing.userType !== "OWNER") return res.status(400).json({ error: "Only owners can be verified" });
-    if (!existing.phone) return res.status(400).json({ error: "Add a phone number before verifying this owner" });
-
-    const user = await prisma.user.update({
-      where: { id: existing.id },
-      data: { isPhoneVerified: true },
-      select: { id: true, isPhoneVerified: true },
     });
     res.json({ user });
   } catch (err) {

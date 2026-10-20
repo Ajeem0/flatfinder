@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Heart, MapPin, BedDouble, Ruler, BadgeCheck, MessageCircle, Check } from "lucide-react";
+import { Heart, MapPin, BedDouble, Ruler, MessageCircle, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Property } from "../types";
 import { formatDate, formatRent, FURNISHING_LABEL } from "../lib/format";
@@ -115,11 +115,6 @@ function PropertyCard({ property, onToggleFavorite, favoritePending, revealDelay
             Available {formatDate(property.availableFrom)}
             {isRecentlyApproved && <span className="ml-2 font-medium text-primary">Approved just now</span>}
           </span>
-          {property.owner?.isPhoneVerified && (
-            <span className="flex items-center gap-1 text-verified font-medium">
-              <BadgeCheck size={13} /> Verified
-            </span>
-          )}
         </div>
       </Link>
       <div className="flex flex-col gap-1 px-2 pb-2 sm:gap-2 sm:px-3 sm:pb-3 lg:px-4 lg:pb-4 lg:flex-row">

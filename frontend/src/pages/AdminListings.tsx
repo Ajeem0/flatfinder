@@ -63,16 +63,6 @@ export default function AdminListings() {
     }
   }
 
-  async function verifyOwner(id: string) {
-    try {
-      await api.admin.verifyOwner(id);
-      setUsers((current) => current?.map((user) => user.id === id ? { ...user, isPhoneVerified: true } : user) ?? current);
-      notify("Owner verified", "success");
-    } catch (err) {
-      notify(err instanceof Error ? err.message : "Could not verify owner", "error");
-    }
-  }
-
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
@@ -113,16 +103,10 @@ export default function AdminListings() {
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-semibold text-ink">{user.name}</h2>
                       <span className="rounded-full bg-primary-soft px-2 py-1 text-[11px] font-semibold text-primary">{user.userType}</span>
-                      {user.isPhoneVerified && <span className="text-xs font-medium text-verified">Phone verified</span>}
                     </div>
                     <p className="mt-1 text-sm text-ink-soft">{user.email}</p>
                     <p className="mt-1 text-sm text-ink">Phone: {user.phone || user.adminPhone || "Not provided"}</p>
                     <p className="mt-1 text-xs text-ink-soft">Joined {new Date(user.createdAt).toLocaleDateString("en-IN")}</p>
-                    {user.userType === "OWNER" && !user.isPhoneVerified && (
-                      <button onClick={() => verifyOwner(user.id)} disabled={!user.phone} className="mt-3 rounded-lg bg-verified px-3 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
-                        Verify owner
-                      </button>
-                    )}
                   </div>
                   <div className="text-sm text-ink-soft">
                     <p>Location: {user.preferredLocation || "Not set"}</p>

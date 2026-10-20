@@ -129,10 +129,6 @@ export const api = {
     me: () => request<{ user: User }>("/auth/me"),
     updateMe: (payload: Partial<User>) =>
       request<{ user: User }>("/auth/me", { method: "PUT", body: JSON.stringify(payload) }),
-    requestPhoneOtp: (phone: string) =>
-      request<{ verified: boolean; message?: string }>("/auth/phone/request", { method: "POST", body: JSON.stringify({ phone }) }),
-    verifyPhoneOtp: (payload: { phone: string; accessToken: string }) =>
-      request<{ user: User }>("/auth/phone/verify", { method: "POST", body: JSON.stringify({ phone: payload.phone, accessToken: payload.accessToken }) }),
     updateAdminPassword: (payload: { currentPassword: string; newPassword: string }) =>
       request<{ message: string }>("/auth/admin/password", { method: "PUT", body: JSON.stringify(payload) }),
   },
@@ -177,7 +173,6 @@ export const api = {
       adminPhone: string | null;
       userType: string;
       profilePhotoUrl: string | null;
-      isPhoneVerified: boolean;
       preferredLocation: string | null;
       budgetMin: number | null;
       budgetMax: number | null;
@@ -188,8 +183,6 @@ export const api = {
     }> }>("/admin/users"),
     updateUserPhone: (id: string, phone: string) =>
       request<{ user: { id: string; phone: string | null } }>(`/admin/users/${id}/phone`, { method: "PUT", body: JSON.stringify({ phone }) }),
-    verifyOwner: (id: string) =>
-      request<{ user: { id: string; isPhoneVerified: boolean } }>(`/admin/users/${id}/verify`, { method: "POST" }),
     pendingProperties: () => request<{ results: Property[] }>("/admin/properties/pending"),
     allProperties: () => request<{ results: Property[] }>("/admin/properties/all"),
     approveProperty: (id: string) => request<{ property: Property }>(`/admin/properties/${id}/approve`, { method: "POST" }),

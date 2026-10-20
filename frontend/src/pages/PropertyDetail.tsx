@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
-  Heart, MapPin, BedDouble, Ruler, Layers, Calendar, BadgeCheck, Phone,
+  Heart, MapPin, BedDouble, Ruler, Layers, Calendar, Phone,
   MessageCircle, CalendarPlus, ChevronLeft, ChevronRight, X, ParkingSquare,
   Building, Wifi, Snowflake, BatteryCharging, ShieldCheck, Dumbbell, Waves,
   SunMedium, Droplets, ShowerHead, Check,
@@ -407,7 +407,6 @@ export default function PropertyDetail() {
             <div>
               <p className="flex items-center gap-1 font-semibold text-ink text-sm">
                 {property.owner?.name}
-                {property.owner?.isPhoneVerified && <BadgeCheck size={14} className="text-verified" />}
               </p>
               <p className="text-xs text-ink-soft">{property.owner?.userType === "OWNER" ? "Property Owner" : "Verified Agent"}</p>
             </div>

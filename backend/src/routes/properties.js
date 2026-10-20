@@ -25,7 +25,7 @@ function handleValidation(req, res, next) {
 const propertyInclude = {
   images: { orderBy: { sortOrder: "asc" } },
   amenities: { include: { amenity: true } },
-  owner: { select: { id: true, name: true, userType: true, profilePhotoUrl: true, isPhoneVerified: true, phone: true } },
+  owner: { select: { id: true, name: true, userType: true, profilePhotoUrl: true, phone: true } },
   location: { include: { city: true } },
 };
 
@@ -48,7 +48,7 @@ const propertyListSelect = {
   createdAt: true,
   updatedAt: true,
   images: { select: { url: true, thumbnailUrl: true, cardUrl: true, mediumUrl: true, largeUrl: true, width: true, height: true, blurDataUrl: true }, orderBy: { sortOrder: "asc" }, take: 1 },
-  owner: { select: { userType: true, isPhoneVerified: true } },
+  owner: { select: { userType: true } },
   location: { select: { name: true, city: { select: { name: true } } } },
 };
 
@@ -74,7 +74,7 @@ function serializePropertyCard(p, isFavorited = false) {
     locationName: p.location?.name || null,
     images: p.images.map((image) => image.thumbnailUrl || image.url),
     imageVariants: image ? [{ thumbnailUrl: image.thumbnailUrl, cardUrl: image.cardUrl, mediumUrl: image.mediumUrl, largeUrl: image.largeUrl, width: image.width, height: image.height, blurDataUrl: image.blurDataUrl }] : [],
-    owner: p.owner ? { userType: p.owner.userType, isPhoneVerified: p.owner.isPhoneVerified } : null,
+    owner: p.owner ? { userType: p.owner.userType } : null,
     isFavorited,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
@@ -122,7 +122,6 @@ function serializeProperty(p, favoritedIds = new Set()) {
           name: p.owner.name,
           userType: p.owner.userType,
           profilePhotoUrl: p.owner.profilePhotoUrl,
-          isPhoneVerified: p.owner.isPhoneVerified,
           // Phone is hidden until a tenant sends an enquiry (see /enquiries) -
           // simple "hide phone until contact requested" trust feature.
         }

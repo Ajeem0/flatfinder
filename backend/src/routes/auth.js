@@ -6,7 +6,6 @@ const { signToken } = require("../utils/jwt");
 const { requireAuth } = require("../middleware/auth");
 const { requireUserType } = require("../middleware/auth");
 const { OAuth2Client } = require("google-auth-library");
-const { verifyMsg91AccessToken } = require("../utils/phoneOtp");
 
 const router = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -25,7 +24,6 @@ const publicUser = (u) => ({
   email: u.email,
   phone: u.phone,
   adminPhone: u.adminPhone,
-  isPhoneVerified: u.isPhoneVerified,
   userType: u.userType,
   profilePhotoUrl: u.profilePhotoUrl,
   preferredLocation: u.preferredLocation,
@@ -111,7 +109,6 @@ router.post("/google", async (req, res, next) => {
           passwordHash: await bcrypt.hash(`${payload.sub}:${process.env.JWT_SECRET || "dev-secret-change-me"}`, 10),
           userType: safeUserType,
           profilePhotoUrl: payload.picture || null,
-          isPhoneVerified: false,
         },
       });
     }
@@ -136,17 +133,12 @@ router.get("/me", requireAuth, async (req, res, next) => {
 router.put("/me", requireAuth, async (req, res, next) => {
   try {
     const { name, phone, adminPhone, profilePhotoUrl, preferredLocation, budgetMin, budgetMax, propertyPreference } = req.body;
-    const phoneField = req.user.userType === "ADMIN" ? "adminPhone" : "phone";
-    const nextPhone = req.user.userType === "ADMIN" ? adminPhone : phone;
-    const existing = await prisma.user.findUnique({ where: { id: req.user.id } });
-    const phoneChanged = typeof nextPhone === "string" && nextPhone.trim() !== (existing?.[phoneField] || "");
     const user = await prisma.user.update({
       where: { id: req.user.id },
       data: {
         name,
         phone: req.user.userType === "ADMIN" ? undefined : phone,
         adminPhone: req.user.userType === "ADMIN" ? adminPhone : undefined,
-        ...(phoneChanged ? { isPhoneVerified: false } : {}),
         profilePhotoUrl,
         preferredLocation,
         budgetMin,
@@ -155,58 +147,6 @@ router.put("/me", requireAuth, async (req, res, next) => {
       },
     });
     res.json({ user: publicUser(user) });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// POST /api/auth/phone/request -- save the number before MSG91 opens its widget
-router.post("/phone/request", requireAuth, async (req, res, next) => {
-  try {
-    const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
-    if (phone.length < 7) return res.status(400).json({ error: "Enter a valid phone number" });
-
-    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-    if (!user) return res.status(404).json({ error: "User not found" });
-    const phoneField = user.userType === "ADMIN" ? "adminPhone" : "phone";
-    if (user[phoneField] === phone && user.isPhoneVerified) return res.json({ verified: true });
-    const updated = await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        [phoneField]: phone,
-        isPhoneVerified: false,
-        phoneOtpHash: null,
-        phoneOtpExpiresAt: null,
-        phoneOtpSentAt: null,
-        phoneOtpAttempts: 0,
-      },
-    });
-    res.json({ user: publicUser(updated), verified: false });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// POST /api/auth/phone/verify -- verify MSG91's widget access token
-router.post("/phone/verify", requireAuth, async (req, res, next) => {
-  try {
-    const accessToken = typeof req.body.accessToken === "string" ? req.body.accessToken.trim() : "";
-    const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
-    if (!accessToken || !phone) return res.status(400).json({ error: "Phone number and MSG91 access token are required" });
-    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-    if (!user) return res.status(404).json({ error: "User not found" });
-    const phoneField = user.userType === "ADMIN" ? "adminPhone" : "phone";
-    if (user[phoneField] !== phone) return res.status(400).json({ error: "The verified number does not match the requested number" });
-    try {
-      await verifyMsg91AccessToken(accessToken);
-    } catch (error) {
-      return res.status(400).json({ error: error.message });
-    }
-    const updated = await prisma.user.update({
-      where: { id: user.id },
-      data: { isPhoneVerified: true },
-    });
-    res.json({ user: publicUser(updated) });
   } catch (err) {
     next(err);
   }
